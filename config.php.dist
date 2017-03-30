@@ -1,0 +1,7 @@
+<?php
+define('MAIL_HOST', '');
+define('MAIL_PORT', 25);
+define('MAIL_USER', '');
+define('MAIL_PASS', '');
+define('MAIL_USER2', '');
+define('MAIL_PASS2', '');

@@ -1,0 +1,4 @@
+<FilesMatch "config\.php|config\.php\.dist|tmp/*|logs/*|uploads/*">
+    order allow,deny
+    deny from all
+</FilesMatch>
