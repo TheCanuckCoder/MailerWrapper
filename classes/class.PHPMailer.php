@@ -1,4 +1,5 @@
 <?php
+namespace HCMailer2017;
 /**
  * PHPMailer - PHP email creation and transport class.
  * PHP Version 5
@@ -25,7 +26,6 @@
  * @author Andy Prevost (codeworxtech) <codeworxtech@users.sourceforge.net>
  * @author Brent R. Matzelle (original founder)
  */
-namespace HCMailer2017;
 class PHPMailer
 {
     /**
@@ -1518,7 +1518,7 @@ class PHPMailer
     public function getSMTPInstance()
     {
         if (!is_object($this->smtp)) {
-            $this->smtp = new SMTP;
+            $this->smtp = new \HCMailer2017\SMTP;
         }
         return $this->smtp;
     }

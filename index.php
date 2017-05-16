@@ -53,6 +53,7 @@ require_once 'PHPMailerAutoload.php';
  * logType: file
  *
  */
+
 // Set array of Info (Largest Sample)			
 $arrayOfInfo = array(
 		'from' 				 => 									   	// From E-mail (Limit 1)
@@ -69,11 +70,11 @@ $arrayOfInfo = array(
 		'nonhtml_body' 		 => 'This is a plain-text message body', 	// plain text body
 		//'attachment' 													// e-mail attachment (relative path), must reside on same domain
 							 //=> 'images/existingticket.png', 			// string or indexed array
-		'allowed_extensions' => array('gif'),									// Allowed extensions for upload
+		'allowed_extensions' => array('gif', 'png', 'jpg'),									// Allowed extensions for upload
 		'mail_method' 		 => 'smtp', 								// can be mail, sendmail or smtp (default)
 		'encryption' 		 => 'tls', 									// use - ssl (deprecated) or tls (default)
 		'authorization' 	 => true, 									// should be set to true (true|false)
-		'ipv6compat' 		 => false, 									// should be set to true (true|false)
+		'ipv6compat' 		 => false, 									// should be set to false (true|false)
 		'timezone'			 => 'America/Toronto',						// timezones: http://php.net/manual/en/timezones.php
 		'language'			 => 'en',									// Language: en|fr
 		'openList'			 => '<ol>',									// When errors appear, the opening wrapper for the error list
@@ -88,20 +89,20 @@ $arrayOfInfo = array(
 		'max_file_size'		 => 2000000,
 		'all_fields'													// All fields we should look for and post in e-mail
 							 => 'realname|Name,email|Email,message|Message',
-		'required_fields'	 => 'realname|Name,email|Email',			// Required fields for validation
+		'required_fields'	 => 'realname|Name,email|Email,fileAttach|File',			// Required fields for validation
 		'isHtml'			 => true,									// E-mails sent can be HTML or Plain-text
 		'refererSite' 		 => 										// 
-								array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev'),
+								array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', 'sad-lap-pub01', '1115.dev'),
 		'refererEmail' 		 => 										//
-								array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev'),
+								array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', 'sad-lap-pub01', '1115.dev'),
 		'debug'				 => false, 									// Turn debugging on/off, prod should be false (true|false)
 		'testConnection'	 => false,									// Determine if you're just testing the connection (SMTP Only)
-		'SMTPDebugLevel'	 => 4,										// 0 = No debug output, 1 = Client commands, 
+		'SMTPDebugLevel'	 => 0,										// 0 = No debug output, 1 = Client commands, 
 																		// 2 = Client commands and server responses (default), 
 																		// 3 = As DEBUG_SERVER plus connection status, 
 																		// 4 = Low-level data output, all messages
 		'logActions'		 => true,									// 
-		'logType' 			 => 'both'									// 
+		'logType' 			 => 'file'									// 
 		);
 
 // Set object of info (Largest Sample)				
@@ -130,7 +131,7 @@ $objectOfInfo->html_body 														// html body (can be .html file or html m
 $objectOfInfo->nonhtml_body 		= 'This is a plain-text message body'; 		// plain text body
 //$objectOfInfo->attachment 													// e-mail attachment (relative path), must reside on same domain
 									//= array('images/existingticket.png', 'images/mail_wizard.gif'); // string or indexed array
-$objectOfInfo->allowed_extensions 	= array('gif');								// Allowed extensions for upload
+$objectOfInfo->allowed_extensions 	= array('gif', 'jpg', 'png');								// Allowed extensions for upload
 $objectOfInfo->mail_method			= 'mail'; 									// can be mail, sendmail or smtp (default)
 $objectOfInfo->encryption			= 'tls'; 									// use - ssl (deprecated) or tls (default)
 $objectOfInfo->authorization		= false; 									// should be set to true (true|false)
@@ -145,12 +146,12 @@ $objectOfInfo->all_fields														// All fields we should look for and post
 									= 'realname|Name,email|Email,message|Message';
 $objectOfInfo->required_fields		= 'realname|Name,email|Email';				// Required fields for validation
 $objectOfInfo->refererSite			= 											// Referer sites we will allow to use this form
-									  array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev');
+									  array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', '1115.dev');
 $objectOfInfo->refererEmail			= 											// Referer Emails which are allowed to send to
 									  array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev');
-$objectOfInfo->debug				= true;										// Turn debugging on/off, prod should be false (true|false)
+$objectOfInfo->debug				= false;										// Turn debugging on/off, prod should be false (true|false)
 $objectOfInfo->testConnection		= false;									// Determine if you're just testing the connection (SMTP Only)
-$objectOfInfo->SMTPDebugLevel 		= 1;										// 0 = No debug output, 1 = Client commands, 
+$objectOfInfo->SMTPDebugLevel 		= 4;										// 0 = No debug output, 1 = Client commands, 
 																				// 2 = Client commands and server responses (default), 
 																				// 3 = As DEBUG_SERVER plus connection status, 
 																				// 4 = Low-level data output, all messages
@@ -158,17 +159,20 @@ $objectOfInfo->SMTPDebugLevel 		= 1;										// 0 = No debug output, 1 = Client
 $objectOfInfo->logActions 			= true;
 $objectOfInfo->logType 				= 'both';
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <!-- InstanceBegin template="/Templates/2col-eng.dwt.php" codeOutsideHTMLIsLocked="false" -->
 <head>
 <!-- CLF 2.0 TEMPLATE VERSION 1.0 | VERSION 1.0 DU GABARIT NSI 2.0 -->
+
 <link rel="schema.dc" href="http://purl.org/dc/elements/1.1/" />
 <link rel="schema.dcterms" href="http://purl.org/dc/terms/" />
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <meta name="dc.language" scheme="ISO639-2/T" content="eng" />
 <!-- METADATA BEGINS | DEBUT DES METADONNEES -->
 <!-- InstanceBeginEditable name="meta" -->
+
 <meta name="robots" content="noindex,nofollow" />
 <title>Publication Request - Health Canada</title>
 <meta name="dc.title" content="Publication Request - Health Canada" />
@@ -178,16 +182,25 @@ $objectOfInfo->logType 				= 'both';
 <meta name="dcterms.modified" scheme="W3CDTF" content="2015-10-30" />
 <meta name="review_date" content="2014-03-09" />
 <meta name="meta_date" content="2012-04-16" />
+<style>
+.red {
+	color:#FF0000;
+}
+</style>
+<?php
+// Add JavaScript error checker from the Mail Wrapper (optional)
+$js = HCMailer2017\HCMailWrapper::_writeJSFunctions($arrayOfInfo);
+echo $js;
+?>
 </head>
 <body>
 <?php
 // Check for the submitted input field
 if (isset($_POST['submit'])) {
 	// Make the call to mailer
-	$mailer = new HCMailer2017\HCMailWrapper($arrayOfInfo); // invoking ths mailer and adding the object/array info to it
-	// String returned from mailer
-	echo $mailer; // show us what string the mailer returns (if any, won't work on redirects).
-}			
+	$mailer = new HCMailer2017\HCMailWrapper($arrayOfInfo); // invoking this mailer and adding the object/array info to it
+	echo $mailer; // show us what string the mailer returns (if any, won't work on redirects). 
+}
 ?>
         <h1>Request Publication</h1>
         <p>Please complete the form below to obtain a Portable Document Format (<abbr>PDF</abbr>) copy of the publication.</p>
@@ -220,4 +233,60 @@ if (isset($_POST['submit'])) {
             <input type="submit" value="Submit" name="submit" />
           </div>
         </form>
+		
+</body>
 </html>
+<?php
+//require_once "classes/class.Ping.php";
+/*
+$ping = new JJG\Ping('smtp.ctst.email-courriel.canada.ca');
+$ping->setPort(587);
+echo 'smtp.ctst.email-courriel.canada.ca: ' . $ping->ping('fsockopen') . '<br>';
+$ping = new JJG\Ping('cbc.ca');
+echo 'cbc.ca: ' . $ping->ping('fsockopen') . '<br><br>';
+// Function to check response time
+function pingDomain($domain, $port){
+    $starttime = microtime(true);
+    $file      = @fsockopen ($domain, $port, $errno, $errstr, 10);
+    $stoptime  = microtime(true);
+    $status    = 0;
+
+    if (!$file) $status = -1;  // Site is down
+    else {
+        fclose($file);
+        $status = ($stoptime - $starttime) * 1000;
+        $status = floor($status);
+    }
+    return $errstr . ' ' . $status;
+}
+echo 'smtp.ctst.email-courriel.canada.ca: ' . pingDomain('smtp.ctst.email-courriel.canada.ca', 587) . '<br>';
+echo 'LAP-PROD-01: ' . pingDomain('LAP-PROD-01', 80) . '<br>';
+echo 'cbc.ca: ' . pingDomain('cbc.ca', 80) . '<br>';
+echo 'sad-mysql-002: ' . pingDomain('sad-mysql-002', 3306) . '<br>';
+echo '1115.dev: ' . pingDomain('1115.dev', 80) . '<br>';
+function urlExists($url=NULL)  
+{  
+    if($url == NULL) return false;  
+    $ch = curl_init($url);  
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);  
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);  
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+    $data = curl_exec($ch);  
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);  
+    curl_close($ch);  
+    if($httpcode>=200 && $httpcode<300){  
+        return 'Pinged';  
+    } else { 
+		if ($httpcode == 530) {
+			return 'Failed. Code: ' . $httpcode . ' Authentication required'; 
+		} else {
+			return 'Failed. Code: ' . $httpcode; 
+		}
+    }  
+}
+echo 'smtp.ctst.email-courriel.canada.ca: ' . urlExists('smtp.ctst.email-courriel.canada.ca', 587) . '<br>';
+echo 'LAP-PROD-01: ' . urlExists('http://LAP-PROD-01/index.php') . '<br>';
+echo 'www.cbc.ca: ' . urlExists('http://www.cbc.ca') . '<br>';
+echo 'http://mysource.hc-sc.gc.ca/eng/user: ' . urlExists('http://mysource.hc-sc.gc.ca/eng/user') . '<br>';
+*/
+?>

@@ -1,25 +1,20 @@
 Author: Steven Scharf
 
-Project: PHP Mailer Extension Wrapper.
+Project: PHP Mailer Extension Wrapper for E-mail Tranformation Initiative (ETI).
 
-State: Beta v1.0 RC (Release Candidate)
+State: Beta v1.01 RC (Release Candidate)
 
-Contact: steve.scharf@live.ca
+Contact: steven.scharf@canada.ca
 
-Configuration File (config.php):
+Configuration File (classes/class.ConfigClass.php):
 
 <?php
-
-define('MAIL_HOST', '');
-
-define('MAIL_PORT', 587);
-
-define('MAIL_USER', '');
-
-define('MAIL_PASS', '');
-
-define('MAIL_USER2', '');
-
-define('MAIL_PASS2', '');
-
-?>
+namespace HCMailer2017;
+class ConfigClass extends HCMailWrapper {
+	public $MAIL_HOST = '';
+	public $MAIL_PORT = 587;
+	public $MAIL_USER = '';
+	public $MAIL_PASS = '';
+	public $MAIL_USER2 = '';
+	public $MAIL_PASS2 ='';
+}

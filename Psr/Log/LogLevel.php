@@ -1,7 +1,5 @@
 <?php
-
 namespace Psr\Log;
-
 /**
  * Describes log levels.
  */

@@ -1,4 +1,5 @@
 <?php
+namespace HCMailer2017;
 /**
  * PSR-3 Logger Interface Implementation
  *
@@ -12,7 +13,6 @@
  * messages regardless of the error level has to implement.
  *
  */
-namespace HCMailer2017;
 use Psr\Log\AbstractLogger;
 /**
  * MailLogger Class for logging information from the HCMailWrapper
@@ -42,6 +42,8 @@ class MailLogger extends AbstractLogger {
 					$logFile = @fopen('logs/email_log_' . date('m-d-Y') . '.log', 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 					echo strtr(nl2br($message), $context);
+				} else if ($log == 'none') {
+					return null;
 				} else {
 					echo strtr(nl2br($message), $context);
 				}
@@ -54,6 +56,8 @@ class MailLogger extends AbstractLogger {
 					$logFile = @fopen('logs/connection_log_' . date('m-d-Y') . '.log', 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 					echo strtr(nl2br($message), $context);
+				} else if ($log == 'none') {
+					return null;
 				} else {
 					echo strtr(nl2br($message), $context);
 				}
@@ -66,6 +70,8 @@ class MailLogger extends AbstractLogger {
 					$logFile = @fopen('logs/misc_log_' . date('m-d-Y') . '.log', 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 					echo strtr(nl2br($message), $context);
+				} else if ($log == 'none') {
+					return null;
 				} else {
 					echo strtr(nl2br($message), $context);
 				}

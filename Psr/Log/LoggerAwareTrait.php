@@ -1,7 +1,5 @@
 <?php
-
 namespace Psr\Log;
-
 /**
  * Basic Implementation of LoggerAwareInterface.
  */

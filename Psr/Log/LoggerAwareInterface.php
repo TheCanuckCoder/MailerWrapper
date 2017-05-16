@@ -1,7 +1,5 @@
 <?php
-
 namespace Psr\Log;
-
 /**
  * Describes a logger-aware instance.
  */

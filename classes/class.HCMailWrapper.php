@@ -1,4 +1,5 @@
 <?php
+namespace HCMailer2017;
 /**
  *
  * Mailer Class
@@ -11,12 +12,12 @@
  * @package 	HCMailWrapper
  * @subpackage	Class PHPMailer() and Class SMTP()
  * @author	 	Steven Scharf (steven.scharf@canada.ca)
- * @since		2017/04/24
+ * @since		2017/04/11
  * @access		public
  * @link 		http://gitlab.ssc.etg.gc.ca/sustaining-applications/CSB-PHPMailerWrapper-SMTP-MAIL-SENDMAIL-2017
  * @license 	http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  *
- * @version: 	Beta (1.0RC)
+ * @version: 	Beta (1.01RC)
  * @todo 		None
  *
  * These application defaults are:
@@ -55,8 +56,7 @@
  * logType: 			file
  *
  */
-namespace HCMailer2017;
-class HCMailWrapper extends PHPMailer {
+class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	/*
 	 * Public Variables
 	 */
@@ -113,7 +113,7 @@ class HCMailWrapper extends PHPMailer {
 	// Mail Attachment
 	protected $attachment = NULL; // for testing, remove prior to production release
 	// Class Return type
-	protected $returnType = 'message'; // Options: message|redirect|debug
+	protected $returnType = 'message'; // Options: message|redirect|boolean|debug
 	// Redirect page (used only if $returnType is set to 'redirect')
 	// must be relative (can redirect to page with 
 	// header for external domain redirection)
@@ -149,12 +149,14 @@ class HCMailWrapper extends PHPMailer {
 	private $allowed =  array('html', 'phtml');
 	private $replySent = false;
 	private $validation_success = true;
+	private $failed_validation = array();
 	private $fields;
 	private $requiredFields;
 	private $message;
 	private $fileContents;
 	private $uploads_dir = './../uploads/';
 	private $allowed_extensions = array('gif','png','jpg','jpeg','doc','docx','pdf','xls','xlsx');
+	private $excluded_extensions = array('exe', 'php', 'phtml', 'py', 'js', 'asp', 'php3', 'php4', 'php5', 'phps', 'jsp', 'sh', 'cgi', 'htm', 'html', 'shtml', 'pl', 'rar');
 	private $sendErrorReport = NULL;
 	private $fileError = true;
 	private $filesUploaded = array();
@@ -164,23 +166,30 @@ class HCMailWrapper extends PHPMailer {
 	private $logger = NULL;
 	private $logActions = false;
 	private $logType = 'file';
-	private $connIncrementer = 0;
+	private static $connTest = 0;
+	private static $reqFieldsStatic;
+	/*
+	 * Backwards compatible __construct();
+	 *
+	 * @description This does all the work to send emails
+	 *
+	 * @return string
+	 */
+	public function HCMailWrapper() {
+		$this->__construct();
+	}
 	/*
 	 * Construct Method, all that's needed to invoke the mailer
+	 * NOTE: Should be changed to just __construct for PHP7 as it is
+	 * deprecated (not removed) from that version. For PHP 5.3 or lower
+	 * than 7. I've created a failsafe callback to the named method to
+	 * ensure it loads as required.
 	 *
 	 * @description This does all the work to send emails
 	 *
 	 * @return string
 	 */
 	public function __construct() {
-		// Check if config.php exists prior to running anything
-		if (!file_exists('config.php')) {
-			echo "You must have a configuration file set up for this service. Please visit the respository where you got this code for more details.<br>http://gitlab.ssc.etg.gc.ca/sustaining-applications/CSB-PHPMailerWrapper-SMTP-MAIL-SENDMAIL";
-			exit;
-		} else {
-			require_once "config.php";
-		}
-		// Logger
 		$this->logger = new MailLogger();
 		// Calling PHPMailer Construct
 		parent::__construct();
@@ -190,6 +199,7 @@ class HCMailWrapper extends PHPMailer {
 		$arguments = $this->getArgs;
 		if (isset($arguments[0])) {
 			$arguments = (object)$arguments[0]; // getting the first and only required argument
+			$this->_writeJSFunctions($arguments);
 			// SMTP needs accurate times, and the PHP time zone MUST be set
 			// This should be done in your php.ini, but this is how to do it if you don't have access to that
 			if (isset($arguments->MAIL_TIMEZONE_SET) && trim($arguments->MAIL_TIMEZONE_SET) > '') {
@@ -278,12 +288,15 @@ class HCMailWrapper extends PHPMailer {
 			if (isset($arguments->refererSite) && is_array($arguments->refererSite)) {
 				$this->refererSite = $arguments->refererSite;
 			}
+			// Add the domain we are on, onto the referer list
+			array_push($this->refererSite, $_SERVER['HTTP_HOST']);
 			// Timezone Default setting
 			date_default_timezone_set($this->MAIL_TIMEZONE_SET);
 			// Validation method (returns true of false)
 			if ($this->_validateArgs() && $this->_refererDomain()) { // arguments are valid
 				// Validate PHPMailer settings
-				if ($validateEmailSettings = $this->_validateEmailSettings($arguments) && !$this->testConnection) {
+				$validateEmailSettings = $this->_validateEmailSettings($arguments);
+				if ($validateEmailSettings && !$this->testConnection) {
 					// Setting the body
 					$this->setBody($arguments);
 					// Check if we are just testing the connection
@@ -335,25 +348,32 @@ class HCMailWrapper extends PHPMailer {
 	 *   True if we had a successful connection, false otherwise
 	 */
 	private function connectionDetermination($arguments, $attempt = 1) {
-		// Incrementer
-		$this->connIncrementer++;
+		$config = new \HCMailer2017\ConfigClass();
+		$data = array();
 		if ($attempt == 2) {
-			$this->Username = MAIL_USER2;
-			$this->Password = MAIL_PASS2;
-			$message = '<strong>Connection Attempt (User 2) #' . $this->connIncrementer . ' (' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $this->Host . PHP_EOL . PHP_EOL;
-			$data = array();
+			$message = '<strong>Connection Attempt (User 2) #' . self::$connTest . ' (' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
 			self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
-			if ($this->connectionSMTPTest($attempt)) {
+			if ($this->connectionSMTPTest(2)) {
+				$message = PHP_EOL . 'Connection Success;' . PHP_EOL;
+				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 				return true;
+			} else {
+				$message = PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
+				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 			}
 			return false;
 		} else if ($attempt == 1) {
-			$message = '<strong>Connection Attempt (User 1) #' . $this->connIncrementer . '(' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $this->Host . PHP_EOL . PHP_EOL;
-			$data = array();
+			$message = '<strong>Connection Attempt (User 1) #' . self::$connTest . '(' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
 			self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
-			if ($this->connectionSMTPTest($attempt)) {
+			if ($this->connectionSMTPTest(1)) {
+				$message = PHP_EOL . 'Connection Success;' . PHP_EOL;
+				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 				return true;
+			} else {
+				$message = PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
+				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 			}
+			return false;
 		}
 		return false;
 	}
@@ -371,18 +391,19 @@ class HCMailWrapper extends PHPMailer {
 	 *   True if we had a successful connection, false otherwise
 	 */
 	private function connectionSMTPTest($attempt = 1) {
+		$config = new \HCMailer2017\ConfigClass();
 		// Create a new SMTP instance
-		$smtp = new SMTP;
-		// Enable connection-level debug output
-		// If debugging is on 
+		$smtp = new \HCMailer2017\SMTP;
+		$data = array();
 		if ($this->debug) {
+			echo '<br>attempt: ' . self::$connTest . ';<br>';
 			$smtp->do_debug = $this->SMTPDebugLevel;
-			$smtp->Debugoutput = function($str, $level) {echo "debug level $level;<br>message: $str<br>";};
 		}
+		// Enable connection-level debug output
 		// Try/Catch the rest
 		try {
 			// Connect to an SMTP server
-			if (!$smtp->connect($this->Host, $this->Port)) {
+			if (!$smtp->connect($config->MAIL_HOST, $config->MAIL_PORT)) {
 				return false;
 			}
 			// Say hello
@@ -403,23 +424,56 @@ class HCMailWrapper extends PHPMailer {
 				}
 				// Get new capabilities list, which will usually now include AUTH if it didn't before
 				$e = $smtp->getServerExtList();
+			} else {
+				if ($this->debug) {
+					$message = 'STARTTLS Failed' . PHP_EOL;
+					self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				}
 			}
 			// If server supports authentication, do it (even if no encryption)
 			if (is_array($e) && array_key_exists('AUTH', $e)) {
-				if ($attempt == 2) {
-					if (!$smtp->authenticate(MAIL_USER2, MAIL_PASS2)) {
+				if ($attempt == 1) {
+					if (!$smtp->authenticate($config->MAIL_USER, $config->MAIL_PASS)) {
+						if ($this->debug) {
+							$message = PHP_EOL . 'Credentials: ' . $config->MAIL_USER . ' - ' . $config->MAIL_PASS . PHP_EOL;
+							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+						}
 						return false;
+					} else {
+						if ($this->debug) {
+							$message = PHP_EOL . 'Connection Success: ' . $config->MAIL_USER . ' - ' . $config->MAIL_PASS . PHP_EOL;
+							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+						}
 					}
 				} else {
-					if (!$smtp->authenticate(MAIL_USER, MAIL_PASS)) {
+					if (!$smtp->authenticate($config->MAIL_USER2, $config->MAIL_PASS2)) {
+						if ($this->debug) {
+							$message = PHP_EOL . 'Credentials: ' . $config->MAIL_USER2 . ' - ' . $config->MAIL_PASS2 . PHP_EOL;
+							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+						}
 						return false;
+					} else {
+						if ($this->debug) {
+							$message = PHP_EOL . 'Connection Success: ' . $config->MAIL_USER2 . ' - ' . $config->MAIL_PASS2 . PHP_EOL;
+							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+						}
 					}
 				}
-				
+			} else {
+				if ($this->debug) {
+					$message = 'AUTH Failed' . PHP_EOL;
+					self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				}
+				return false;
 			}
 		} catch (\Exception $e) {
 			$e->getMessages();
-			return false;
+		}
+		// If debugging is on 
+		if ($this->debug) {
+			$smtp->Debugoutput = function($str, $level) {
+				echo "debug level $level;<br>message: $str<br>";
+			};
 		}
 		// Whatever happened, close the connection.
 		$smtp->quit(true);
@@ -463,7 +517,7 @@ class HCMailWrapper extends PHPMailer {
 			}
 		}
 		// Check fields submitted via POST
-		if (isset($this->allFields) && $this->_validateFormFields() === true) {
+		if (isset($this->allFields) && $this->_validateRequiredFormFields() === true) {
 			// Split by comma delimitation
 			$fields = explode(",", $this->allFields);
 			// Initialize message
@@ -527,8 +581,18 @@ class HCMailWrapper extends PHPMailer {
 		if ($this->sendMail()) {
 			// Check return type requested
 			if (isset($this->returnType) && $this->returnType == 'redirect' && isset($this->redirectPage) && $this->redirectPage !== false && trim($this->redirectPage) != '' && $this->_is_filepath($this->redirectPage)) {
-				header('Location: ' . $this->redirectPage);
-				exit; // stop processing after redirect
+				if (headers_sent()) {
+					?>
+					<script type="text/javascript">
+					window.location.href = '<?= $this->redirectPage; ?>';
+					</script>
+					<?php
+				} else { 
+					header('Location: ' . $this->redirectPage);
+					exit; // stop processing after redirect
+				}
+			} else if (isset($this->returnType) && $this->returnType == 'boolean') {
+				return true;
 			} else if (isset($this->returnType) && $this->returnType == 'message') {
 				// return message (user will need to echo this)
 				$this->errorType = 'message';
@@ -576,7 +640,7 @@ class HCMailWrapper extends PHPMailer {
 		if ($this->validation_success) {
 			// See if message can be sent
 			if (!$this->send()) { // failed
-				$message = 'Mail failed to send on host {host} and port {port}' . PHP_EOL . 'Logged in with the username {user} and password {pass}';
+				$message = 'Mail failed to send on host {host} and port {port}' . PHP_EOL . 'Logged in with the username {user} and password {pass}' . PHP_EOL;
 				$data = array(
 				   '{host}'    => $this->Host,
 				   '{port}' => $this->Port,
@@ -667,6 +731,10 @@ class HCMailWrapper extends PHPMailer {
 		}
 		$objectOfInfo->isHtml 			= false; // auto replies are non-html
 		$objectOfInfo->sendFormData 	= false; // no form data is sent with auto replies
+		$objectOfInfo->logType 			= 'none';
+		$objectOfInfo->logActions 		= false;
+		$objectOfInfo->SMTPDebugLevel 	= 0;
+		$objectOfInfo->debug 			= false;
 		// Check for reply message
 		if (isset($this->reply_message) && $this->reply_message !== false && trim($this->reply_message) > '') {
 			$objectOfInfo->nonhtml_body = $this->reply_message; // custom message
@@ -676,9 +744,47 @@ class HCMailWrapper extends PHPMailer {
 		// Set remaining mailer settings
 		$this->replySent = true; // must be set to avoid infinite loops
 		$mail = $this->__construct($objectOfInfo); // send e-mail
+		$data = array();
+		$to = '';
+		$i = 0;
+		if (isset($objectOfInfo->to) && is_array($objectOfInfo->to)) {
+			$email = key($objectOfInfo->to);
+			$name = $objectOfInfo->to[$email];
+		}
+		self::_logActions($this->logActions, 'info', 'Email Reply Message Sent to: ' . $name . '<' . $email . '> on ' . date('M d, Y') . PHP_EOL . PHP_EOL, $data, 'misc', 'file');
 		// Return message (if any exist)
 		return $mail;
 	}
+	/*
+	 * JS methods needed on all 
+	 * pages using this wrapper
+	 *
+	 * @access public
+	 * @description Builds JavaScript for use with the forms
+	 *
+	 * @see N/A
+	 * @return boolean
+	 *  Returns JavaScript for use with the form
+	 */
+	public static function _writeJSFunctions($arrayOfInfo) {
+		$arrayOfInfo = (object)$arrayOfInfo;
+		if (isset($arrayOfInfo) && is_object($arrayOfInfo) && !empty($arrayOfInfo) && isset($arrayOfInfo->required_fields) && trim($arrayOfInfo->required_fields) > '') {
+			self::$reqFieldsStatic = $arrayOfInfo->required_fields;
+		}
+		$js = '<script type="text/javascript">' . PHP_EOL;
+		$js .= 'window.onload = function() {' . PHP_EOL;
+		$requiredFields = explode(",", self::$reqFieldsStatic);
+		foreach ($requiredFields as $value) {
+			$tmpReq = explode("|", $value); // split out field entry
+			if (isset($tmpReq[0]) && trim($tmpReq[0]) > '') {
+				$js .= "\t" . "var div = document.getElementById('" . $tmpReq[0] . "');" . PHP_EOL;
+				$js .= "\t" . "div.setAttribute('required', 'required');" . PHP_EOL;
+			}
+		}
+		$js .= '}' . PHP_EOL;
+		$js .= "</script>" . PHP_EOL;
+		return $js;
+	}	
 	/*
 	 * Email received, reply will be sent method
 	 *
@@ -884,6 +990,7 @@ class HCMailWrapper extends PHPMailer {
 		if (isset($arguments->debug) && $arguments->debug) {
 			$this->debug = true;
 		}
+		$config = new \HCMailer2017\ConfigClass();
 		// Create a new PHPMailer instance
 		//$this->mailer = new PHPMailer();
 		$this->XMailer = 'Health Canada PHP Mailer Version 5';
@@ -894,6 +1001,7 @@ class HCMailWrapper extends PHPMailer {
 		$this->ClearReplyTos();
 		$this->ClearAttachments();
 		$this->ClearCustomHeaders();
+		$this->WordWrap = 50;
 		if (isset($arguments->language) && trim($arguments->language) > '') {
 			$this->language = $arguments->language;
 		}
@@ -921,7 +1029,7 @@ class HCMailWrapper extends PHPMailer {
 			}
 		}
 		// Check if host was supplied
-		$this->Host = MAIL_HOST;
+		$this->Host = $config->MAIL_HOST;
 		if (isset($arguments->host) && trim($arguments->host) > '') {
 			$this->Host = $arguments->host;
 		}
@@ -934,7 +1042,7 @@ class HCMailWrapper extends PHPMailer {
 			$this->Host = gethostbyname($this->Host); 
 		}
 		// Set port
-		$this->Port = MAIL_PORT;
+		$this->Port = $config->MAIL_PORT;
 		if (isset($arguments->port) && trim($arguments->port) > '' && is_int($arguments->port) && $arguments->port != -1) {
 			$this->Port = $arguments->port;
 		}
@@ -1045,10 +1153,19 @@ class HCMailWrapper extends PHPMailer {
 		}
 		// Set the subject line
 		$this->Subject = $this->subject;
+		// Required fields needed to see if file was required
+		$requiredFields = explode(",", $this->required_fields);
+		$reqFields = array();
+		foreach ($requiredFields as $field) {
+			$split = explode("|", $field);
+			if (isset($split[0]) && trim($split[0]) > '') {
+				$reqFields[] = $split[0];
+			}
+		}
 		// Checking for uploaded files
 		if (isset($_FILES)) {
 			// Loop through uploaded files
-			foreach ($_FILES as $usefile) {
+			foreach ($_FILES as $key=>$usefile) {
 				$filetype = $usefile["type"];
 				$filesize = $usefile["size"];
 				$filename = $usefile["name"];
@@ -1056,25 +1173,31 @@ class HCMailWrapper extends PHPMailer {
 				$filetemp = $usefile["tmp_name"];
 				// If it does not exceed file size
 				// Attach file
-				if ($this->_fileSize($filesize) && in_array($ext, $this->allowed_extensions)) {
+				if ($this->_fileSize($filesize) && in_array($ext, $this->allowed_extensions) && !in_array($ext, $this->excluded_extensions)) {
 					// Moving uploaded file to the upload directory
 					if (move_uploaded_file($filetemp, "$this->uploads_dir/$filename")) {
 						$this->fileError = false;
 						$this->filesUploaded[] = $this->uploads_dir . '/' . $filename;
 						$this->addAttachment("$this->uploads_dir/$filename"); // adding attachment to e-mail
 					}
-				} else {
+					// Remove the image field from the required fields
+					// If it was a required field
+					unset($reqFields[$key]);
+					if(($key = array_search($key, $reqFields)) !== false) {
+						unset($reqFields[$key]);
+					}
+					$this->required_fields = implode(",", $reqFields);
+				} else if (in_array($key, $reqFields) === true) {
 					// since we have a return here
 					// we need to validate form fields
 					// since we caught an attachment error
 					// validation would not proceed on fields
 					// if this is not invoked here.
-					$this->_validateFormFields(); 
+					$this->_validateRequiredFormFields(); 
 					$this->_attachmentError();
-					return false;
 				}
 			}
-		}		
+		}
 		// Attach an image file
 		if (isset($arguments->attachment) && !is_array($arguments->attachment) && trim($arguments->attachment) > '') {
 			$this->attachment = $arguments->attachment;
@@ -1092,49 +1215,50 @@ class HCMailWrapper extends PHPMailer {
 		if (isset($arguments->username) && trim($arguments->username) > '') {
 			$this->Username = $arguments->username;
 		} else {
-			$this->Username = MAIL_USER;
+			$this->Username = $config->MAIL_USER;
 		}
 		// Password to use for SMTP authentication
 		if (isset($arguments->password) && trim($arguments->password) > '') {
 			$this->Password = $arguments->password;
 		} else {
-			$this->Password = MAIL_PASS;
+			$this->Password = $config->MAIL_PASS;
 		}
 		// Test/Check/Get connection
 		if ($this->MailAuth && isset($this->mailMethod) && trim($this->mailMethod) == 'smtp') {
 			$connOne = false;
 			$connTwo = false;
-			if (!file_exists('./tmp/conn1failure.log')) {
-				$connOne = $this->connectionDetermination($arguments, 1);
-			}
+			self::$connTest++;
+			$data = array();
+			$message = 'Attempting Connection #' . self::$connTest . PHP_EOL;
+			self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+			$connOne = $this->connectionDetermination($arguments, 1);
+			self::$connTest++;
 			if ($connOne) { // first connection text
-				$this->mailerUseType();
+				$this->_mailerUseType();
 				return true;
 			} else {
-				$logFile = fopen('./tmp/conn1failure.log', 'w');
+				$logFile = @fopen('./tmp/conn1failure.log', 'w');
 				@fwrite($logFile, 'Connection 1 is not available. Delete this file when the credentials have changed and authorization is granted.');
-				if (!file_exists('./tmp/conn2failure.log')) {
-					$connTwo = $this->connectionDetermination($arguments, 2);
-					if ($connTwo) { // second/final connection test
-						$this->mailerUseType();
-						return true;
-					} else {
-						$logFile = fopen('./tmp/conn2failure.log', 'w');
-						@fwrite($logFile, 'Connection 2 is not available. Delete this file when the credentials have changed and authorization is granted.');
-						$this->validation_success = false;
-						return false;
-					}
+				$message = PHP_EOL . 'Attempting Connection #' . self::$connTest . PHP_EOL;
+				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				$this->Username = $config->MAIL_USER2;
+				$this->Password = $config->MAIL_PASS2;
+				$connTwo = $this->connectionDetermination($arguments, 2);
+				if ($connTwo) { // second/final connection test
+					$this->_mailerUseType();
+					return true;
+				} else {
+					$logFile = @fopen('./tmp/conn2failure.log', 'w');
+					@fwrite($logFile, 'Connection 2 is not available. Delete this file when the credentials have changed and authorization is granted.');
+					return false;
 				}
-				$this->validation_success = false;
-				return false;
 			}
-			$this->validation_success = false;
 			return false;
 		} else {
 			return true;
 		}
 		// Return true if nothing was wrong
-		return false;
+		return true;
 	}
 	/*
 	 * Initilize the type of mail
@@ -1149,7 +1273,7 @@ class HCMailWrapper extends PHPMailer {
 	 * @return boolean
 	 *   Finds the type of mail service we will use, usually SMTP
 	 */
-	private function mailerUseType() {
+	private function _mailerUseType() {
 		// Tell PHPMailer which function to use for sending -email
 		if ($this->mailMethod == 'mail') { // mail method
 			// Mail
@@ -1185,6 +1309,36 @@ class HCMailWrapper extends PHPMailer {
 		}
 	}
 	/*
+	 * Initialize Form Fields Validator (Static Version)
+	 *
+	 * @access private
+	 * @description This validates form fields that were set in the configuration statically
+	 *
+	 * @see self::_writeJSFunctions();
+	 *
+	 * @return boolean
+	 *   Form field validation if required fields were set
+	 */
+	private static function _staticValidateRequiredFormFields($requiredFields) {
+		// Look for empty fields
+		$tmpReq = array();
+		// Checking which fields are required (if any are required)
+		if (isset($requiredFields)) {
+			$requiredFields = explode(",", $requiredFields);
+			$failed = array();
+			foreach ($requiredFields as $value) {
+				$tmpReq = explode("|", $value); // split out field entry
+				if (empty($_POST[$tmpReq[0]])) { // make sure the post exists prior to validating
+					if (isset($tmpReq[1]) && trim($tmpReq[1]) > '') {
+						return false;
+					}
+				}
+			}
+		}
+		// Return true...all is well
+		return true;
+	}
+	/*
 	 * Initialize Form Fields Validator
 	 *
 	 * @access private
@@ -1195,7 +1349,7 @@ class HCMailWrapper extends PHPMailer {
 	 * @return boolean
 	 *   Form field validation if required fields were set
 	 */
-	private function _validateFormFields() {
+	private function _validateRequiredFormFields() {
 		// Look for empty fields
 		$tmpReq = array();
 		$sendErrorReport = '';
@@ -1206,6 +1360,7 @@ class HCMailWrapper extends PHPMailer {
 			$sendErrorReport .= $this->openList;
 			// Looping through required fields
 			$this->validation_success = true;
+			$failed = array();
 			foreach ($requiredFields as $value) {
 				$tmpReq = explode("|", $value); // split out field entry
 				if (empty($_POST[$tmpReq[0]])) { // make sure the post exists prior to validating
@@ -1334,10 +1489,38 @@ class HCMailWrapper extends PHPMailer {
 				}
 				$extensions .= $this->closeList;
 			}
+			$requiredFields = explode(",", $this->required_fields);
+			$reqFields = array();
+			$checkFilesForValidity = false;
+			foreach ($requiredFields as $field) {
+				$split = explode("|", $field);
+				if (isset($split[0]) && trim($split[0]) > '') {
+					$reqFields[] = $split[0];
+				}
+			}
 			// File error encountered in attachment
 			if ($this->fileError) {
+				$files = '';
 				// Return
-				return $this->FORM_ERROR_MESSAGE . $this->sendErrorReport . '<br>' . $this->ATTACHMENT_ERROR . $extensions;
+				if (isset($_FILES) && !empty($_FILES)) {
+					foreach ($_FILES as $key=>$usefile) {
+						$filetype = $usefile["type"];
+						$filesize = $usefile["size"];
+						$filename = $usefile["name"];
+						$ext = pathinfo($filename, PATHINFO_EXTENSION);
+						$filetemp = $usefile["tmp_name"];
+						$files .= $filename . '<br>';
+						if (in_array($key, $reqFields)) {
+							$checkFilesForValidity = true;
+						}
+					}
+				}
+				if (trim($files) == '') {
+					$files = 'None';
+				}
+				if ($checkFilesForValidity) {
+					return $this->FORM_ERROR_MESSAGE . $this->sendErrorReport . 'File: ' . $files . '<br>' . $this->ATTACHMENT_ERROR . $extensions;
+				}
 			}
 			// Return
 			return $this->FORM_ERROR_MESSAGE . $this->sendErrorReport;
@@ -1349,7 +1532,7 @@ class HCMailWrapper extends PHPMailer {
 			return $this->MAIL_UNKNOWN_ERROR;
 		} else {
 			// Return
-			return $this->MAIL_SENT;
+			return $this->MAIL_UNKNOWN_ERROR;
 		}
 	}
 	/*

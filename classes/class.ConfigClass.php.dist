@@ -1,0 +1,10 @@
+<?php
+namespace HCMailer2017;
+class ConfigClass extends HCMailWrapper {
+	public $MAIL_HOST = '';
+	public $MAIL_PORT = 587;
+	public $MAIL_USER = '';
+	public $MAIL_PASS = '';
+	public $MAIL_USER2 = '';
+	public $MAIL_PASS2 ='';
+}
