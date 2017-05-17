@@ -78,4 +78,51 @@ class MailLogger extends AbstractLogger {
 				break;
 		}
 	}
+	/*
+	 * Email received, reply will be sent method
+	 *
+	 * @access protected
+	 * @description Logs actions if the user chooses to
+	 *
+	 * @see self::\Psr\Log\AbstractLogger();
+	 *
+	 * @return void
+	 *   writes a log to the log file in the logs folder.
+	 */
+	public static function _logActions($log = false, $logLevel = 'info', $message = '', $data = array(), $type = 'email', $logType = 'file') {
+		if (!isset($logLevel) || $logLevel == '') {
+			$logLevel = \Psr\Log\LogLevel::INFO;
+		} else {
+			switch ($logLevel) {
+				case 'emergency':
+					$logLevel = \Psr\Log\LogLevel::EMERGENCY;
+					break;
+				case 'alert':
+					$logLevel = \Psr\Log\LogLevel::ALERT;
+					break;
+				case 'critical':
+					$logLevel = \Psr\Log\LogLevel::CRITICAL;
+					break;
+				case 'error':
+					$logLevel = \Psr\Log\LogLevel::ERROR;
+					break;
+				case 'warning':
+					$logLevel = \Psr\Log\LogLevel::WARNING;
+					break;
+				case 'notice':
+					$logLevel = \Psr\Log\LogLevel::NOTICE;
+					break;
+				case 'info':
+					$logLevel = \Psr\Log\LogLevel::DEBUG;
+					break;
+				default:
+					$logLevel = \Psr\Log\LogLevel::INFO;
+					break;
+			}
+		}
+		if (isset($log) && is_bool($log) && $log && isset($message) && trim($message) > '' && isset($data) && is_array($data)) {
+			$logger = new MailLogger();
+			$logger->log($logLevel, $message, $data, $type, $logType);
+		}
+	}
 }

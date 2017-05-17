@@ -78,6 +78,8 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	public $customReturnMessage = 'Thanks for contacting us!';
 	public $reply_subject = NULL;
 	public $reply_message = NULL;
+	public $SMTPAuth = false; // SMTP Requires Authentication
+	public $SMTPSecure = 'tls'; //Set the encryption system to use - ssl (deprecated) or tls
 	/*
 	 * Protected Variables
 	 */
@@ -136,13 +138,11 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	/*
 	 * Private Variables
 	 */
-	// Credentials for SMTP
+	// Other Credentials
 	private $host = '';
 	private $mailMethod = 'smtp';
-	private $MailAuth = true; // SMTP Requires Authentication
 	private $IPV6Compat = false; // if your network does not support SMTP over IPv6
 	private $port = 587; // Set the SMTP port number - 587 for authenticated TLS, a.k.a. RFC4409 SMTP submission
-	private $MailSecure = 'tls'; //Set the encryption system to use - ssl (deprecated) or tls
 	private $numberOfArgs;
 	private $getArgs;
 	// allowed extensions for HTML Body File E.g.: content.html
@@ -191,7 +191,6 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->logger = new MailLogger();
 		// Calling PHPMailer Construct
 		parent::__construct();
 		$this->numberOfArgs = func_num_args();
@@ -366,26 +365,26 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		$data = array();
 		if ($attempt == 2) {
 			$message = '<strong>Connection Attempt (User 2) #' . self::$connTest . ' (' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
-			self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+			MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 			if ($this->connectionSMTPTest(2)) {
 				$message = PHP_EOL . 'Connection Success;' . PHP_EOL;
-				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 				return true;
 			} else {
 				$message = PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
-				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 			}
 			return false;
 		} else if ($attempt == 1) {
 			$message = '<strong>Connection Attempt (User 1) #' . self::$connTest . '(' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
-			self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+			MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 			if ($this->connectionSMTPTest(1)) {
 				$message = PHP_EOL . 'Connection Success;' . PHP_EOL;
-				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 				return true;
 			} else {
 				$message = PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
-				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 			}
 			return false;
 		}
@@ -441,7 +440,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			} else {
 				if ($this->debug) {
 					$message = 'STARTTLS Failed' . PHP_EOL;
-					self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+					MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 				}
 			}
 			// If server supports authentication, do it (even if no encryption)
@@ -450,33 +449,33 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 					if (!$smtp->authenticate($config->MAIL_USER, $config->MAIL_PASS)) {
 						if ($this->debug) {
 							$message = PHP_EOL . 'Credentials: ' . $config->MAIL_USER . ' - ' . $config->MAIL_PASS . PHP_EOL;
-							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+							MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 						}
 						return false;
 					} else {
 						if ($this->debug) {
 							$message = PHP_EOL . 'Connection Success: ' . $config->MAIL_USER . ' - ' . $config->MAIL_PASS . PHP_EOL;
-							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+							MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 						}
 					}
 				} else {
 					if (!$smtp->authenticate($config->MAIL_USER2, $config->MAIL_PASS2)) {
 						if ($this->debug) {
 							$message = PHP_EOL . 'Credentials: ' . $config->MAIL_USER2 . ' - ' . $config->MAIL_PASS2 . PHP_EOL;
-							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+							MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 						}
 						return false;
 					} else {
 						if ($this->debug) {
 							$message = PHP_EOL . 'Connection Success: ' . $config->MAIL_USER2 . ' - ' . $config->MAIL_PASS2 . PHP_EOL;
-							self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+							MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 						}
 					}
 				}
 			} else {
 				if ($this->debug) {
 					$message = 'AUTH Failed' . PHP_EOL;
-					self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+					MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 				}
 				return false;
 			}
@@ -656,12 +655,12 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			if (!$this->send()) { // failed
 				$message = 'Mail failed to send on host {host} and port {port}' . PHP_EOL . 'Logged in with the username {user} and password {pass}' . PHP_EOL;
 				$data = array(
-				   '{host}'    => $this->Host,
-				   '{port}' => $this->Port,
-				   '{user}'    => $this->Username,
-				   '{pass}' => $this->Password
+				   '{host}'    	=> $this->Host,
+				   '{port}' 	=> $this->Port,
+				   '{user}'    	=> $this->Username,
+				   '{pass}' 	=> $this->Password
 				);
-				self::_logActions($this->logActions, 'info', $message, $data, 'email', $this->logType);
+				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'email', $this->logType);
 				return false;
 			} else {
 				if (isset($this->toaddress) && is_array($this->toaddress)) {
@@ -680,7 +679,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 						   '{email}' => $email,
 						   '{name}' => $name
 						);
-						self::_logActions($this->logActions, 'error', $message, $data, 'email', $this->logType);
+						MailLogger::_logActions($this->logActions, 'error', $message, $data, 'email', $this->logType);
 					}
 				}
 				if (isset($this->from) && is_array($this->from)) {
@@ -699,7 +698,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 						   '{email}' => $email,
 						   '{name}' => $name
 						);
-						self::_logActions($this->logActions, 'error', $message, $data, 'email', $this->logType);
+						MailLogger::_logActions($this->logActions, 'error', $message, $data, 'email', $this->logType);
 					}
 				}
 			}
@@ -768,7 +767,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			$email = key($objectOfInfo->to);
 			$name = $objectOfInfo->to[$email];
 		}
-		self::_logActions($this->logActions, 'info', 'Email Reply Message Sent to: ' . $name . '<' . $email . '> on ' . date('M d, Y') . ' @ ' . date('h:i:s A') . PHP_EOL . PHP_EOL, $data, 'misc', 'file');
+		MailLogger::_logActions($this->logActions, 'info', 'Email Reply Message Sent to: ' . $name . '<' . $email . '> on ' . date('M d, Y') . ' @ ' . date('h:i:s A') . PHP_EOL . PHP_EOL, $data, 'misc', 'file');
 		// Return message (if any exist)
 		return $mail;
 	}
@@ -801,53 +800,6 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		$js .= '}' . PHP_EOL;
 		$js .= "</script>" . PHP_EOL;
 		return $js;
-	}	
-	/*
-	 * Email received, reply will be sent method
-	 *
-	 * @access protected
-	 * @description Logs actions if the user chooses to
-	 *
-	 * @see self::\Psr\Log\AbstractLogger();
-	 *
-	 * @return void
-	 *   writes a log to the log file in the logs folder.
-	 */
-	public static function _logActions($log = false, $logLevel = 'info', $message = '', $data = array(), $type = 'email', $logType = 'file') {
-		if (!isset($logLevel) || $logLevel == '') {
-			$logLevel = \Psr\Log\LogLevel::INFO;
-		} else {
-			switch ($logLevel) {
-				case 'emergency':
-					$logLevel = \Psr\Log\LogLevel::EMERGENCY;
-					break;
-				case 'alert':
-					$logLevel = \Psr\Log\LogLevel::ALERT;
-					break;
-				case 'critical':
-					$logLevel = \Psr\Log\LogLevel::CRITICAL;
-					break;
-				case 'error':
-					$logLevel = \Psr\Log\LogLevel::ERROR;
-					break;
-				case 'warning':
-					$logLevel = \Psr\Log\LogLevel::WARNING;
-					break;
-				case 'notice':
-					$logLevel = \Psr\Log\LogLevel::NOTICE;
-					break;
-				case 'info':
-					$logLevel = \Psr\Log\LogLevel::DEBUG;
-					break;
-				default:
-					$logLevel = \Psr\Log\LogLevel::INFO;
-					break;
-			}
-		}
-		if (isset($log) && is_bool($log) && $log && isset($message) && trim($message) > '' && isset($data) && is_array($data)) {
-			$logger = new MailLogger();
-			$logger->log($logLevel, $message, $data, $type, $logType);
-		}
 	}
 	/*
 	 * _techError() method
@@ -863,7 +815,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	protected function _techError() {
 		$message = 'There was a technical error encountered likely due to a configuration issue.' . PHP_EOL;
 		$data = array();
-		self::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
+		MailLogger::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
 		$this->errorType = 'tech'; // error type encountered
 		// calls the __toStrng() function 
 		// which turns the object set 
@@ -883,7 +835,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	protected function _attachmentError() {
 		$message = 'There was an unknown error attaching a file to the e-mail. Make sure the folder where files are uploaded has the proper permissions and your filename is less than 255 character long.' . PHP_EOL;
 		$data = array();
-		self::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
+		MailLogger::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
 		$this->errorType = 'attachment'; // error type encountered
 		// calls the __toString() function 
 		// which turns the object set 
@@ -986,7 +938,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		} else { // too many arguments found
 			$message = 'Bad argument count, e-mail has not been sent.' . PHP_EOL;
 			$data = array();
-			self::_logActions($this->logActions, 'error', $message, $data, 'misc', $this->logType);
+			MailLogger::_logActions($this->logActions, 'error', $message, $data, 'misc', $this->logType);
 			return false;
 		}
 	}
@@ -1064,16 +1016,15 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			$this->Port = $arguments->port;
 		}
 		// Encryption system to use
-		$this->SMTPSecure = false;
-		if (isset($arguments->encryption) && is_bool($arguments->encryption) && $arguments->encryption) {
-			$this->SMTPSecure = true;
+		$this->SMTPSecure = 'tls';
+		if (isset($arguments->encryption) && trim($arguments->encryption) > '') {
+			$this->SMTPSecure = $arguments->encryption;
 		}
 		// Whether to use SMTP authentication
 		$this->SMTPAuth = false;
 		if (isset($arguments->authorization) && is_bool($arguments->authorization) && $arguments->authorization) {
-			$this->MailAuth = true;
+			$this->SMTPAuth = true;
 		}
-		$this->SMTPAuth = $this->MailAuth;
 		// Set who the message is to be sent from
 		if (isset($arguments->from)) {
 			$this->from = $arguments->from;
@@ -1257,13 +1208,13 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			$this->Password = $config->MAIL_PASS;
 		}
 		// Test/Check/Get connection
-		if ($this->MailAuth && isset($this->mailMethod) && trim($this->mailMethod) == 'smtp') {
+		if ($this->SMTPAuth && isset($this->mailMethod) && trim($this->mailMethod) == 'smtp') {
 			$connOne = false;
 			$connTwo = false;
 			self::$connTest++;
 			$data = array();
 			$message = 'Attempting Connection #' . self::$connTest . PHP_EOL;
-			self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+			MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 			$connOne = $this->connectionDetermination($arguments, 1);
 			self::$connTest++;
 			if ($connOne) { // first connection text
@@ -1273,7 +1224,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 				$logFile = @fopen('./tmp/conn1failure.log', 'w');
 				@fwrite($logFile, 'Connection 1 is not available. Delete this file when the credentials have changed and authorization is granted.');
 				$message = PHP_EOL . 'Attempting Connection #' . self::$connTest . PHP_EOL;
-				self::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 				$this->Username = $config->MAIL_USER2;
 				$this->Password = $config->MAIL_PASS2;
 				$connTwo = $this->connectionDetermination($arguments, 2);
@@ -1334,7 +1285,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 						'{level}' => $level,
 						'{message}' => $str
 					);
-					HCMailWrapper::_logActions($logActions, 'info', $message, $data, 'connection', $logType);
+					MailLogger::_logActions($logActions, 'info', $message, $data, 'connection', $logType);
 					echo nl2br($message);
 				};
 				
@@ -1487,7 +1438,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		}
 		$message = 'The e-mail you are sending to is not a valid domain.' . PHP_EOL;
 		$data = array();
-		self::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
+		MailLogger::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
 		return false;
 	}
 	/*
@@ -1511,7 +1462,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		}
 		$message = 'Bad referrer, e-mail has not been sent.' . PHP_EOL;
 		$data = array();
-		self::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
+		MailLogger::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
 		return false;
 	}
 	/*
