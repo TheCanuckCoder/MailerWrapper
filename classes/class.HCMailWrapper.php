@@ -65,15 +65,15 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	/*
 	 * Language based variables, see languages/mail-main.lang-fr.php
 	 */
-	public $MAIL_UNKNOWN_ERROR = 'There was an unknown error, please contact the site administrator.';
-	public $MAIL_TECH_ERROR = 'There was a technical error, please contact the site administrator.';
-	public $MAIL_ERROR = 'Mail error, please contact the site administrator.';
-	public $MAIL_ERROR_PREFIX = 'Mailer error: ';
-	public $MAIL_SENT = 'Your message has been sent.';
-	public $FORM_ERROR_MESSAGE = "There was an unknown error attaching a file to the e-mail. Make sure your filename is less than 255 characters long.";
-	public $EMAIL_RECIEVED_REPLY = "This is an auto-generated e-mail; please do not reply.\r\n Your message has been received by the Web site administrator and is being forwarded to a subject-matter expert for consideration and a timely response.\r\n Thank you for your interest in Health Canada Online.";
-	public $ATTACHMENT_ERROR = "Invalid file extension, please select a file that matches one of the following extensions: ";
-	public $CONNECTION_TEST = "Connection Test is Active, no e-mails will be sent (SMTP Only).";
+	public $MAIL_UNKNOWN_ERROR = NULL;
+	public $MAIL_TECH_ERROR = NULL;
+	public $MAIL_ERROR = NULL;
+	public $MAIL_ERROR_PREFIX = NULL;
+	public $MAIL_SENT = NULL;
+	public $FORM_ERROR_MESSAGE = NULL;
+	public $EMAIL_RECIEVED_REPLY = NULL;
+	public $ATTACHMENT_ERROR = NULL;
+	public $CONNECTION_TEST = NULL;
 	// Custom Message return (used only if $returnType is set to 'message')
 	public $customReturnMessage = 'Thanks for contacting us!';
 	public $reply_subject = NULL;
@@ -160,8 +160,8 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	private $sendErrorReport = NULL;
 	private $fileError = true;
 	private $filesUploaded = array();
-	private $refererEmail = array('canada.ca', 'hc-sc.gc.ca', 'list.hc-sc.gc.ca', 'chemicalsubstanceschimiques.gc.ca'); // list of email domain names
-	private $refererSite = array('mailer.dev', 'canada.ca', 'web.hc-sc.gc.ca', 'www.hc-sc.gc.ca', 'hc-sc.gc.ca','www.sc-hc.gc.ca/','sc-hc.gc.ca/', '205.193.190.11'); // list of site domain names
+	private $refererEmail = array('canada.ca', 'hc-sc.gc.ca'); // list of email domain names
+	private $refererSite = array('mailer.dev'); // list of site domain names
 	private $versionInfo = 'Version 1.10 RC';
 	private $logger = NULL;
 	private $logActions = false;
@@ -979,22 +979,42 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			// Set language in PHP Mailer (errors only)
 			$this->setLanguage($this->language);
 			// Set up the error messages to be french
-			if ($this->language == 'fr') {
-				// include our french language file and suppress potential warnings/errors
-				@include 'language/mail-main.lang-fr.php';
-				// Recasting language variables
-				$this->MAIL_UNKNOWN_ERROR = $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'];
-				$this->MAIL_TECH_ERROR = $HC_MAIL_WRAPPER['MAIL_TECH_ERROR'];
-				$this->MAIL_ERROR = $HC_MAIL_WRAPPER['MAIL_ERROR'];
-				$this->MAIL_ERROR_PREFIX = $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'];
-				$this->MAIL_SENT = $HC_MAIL_WRAPPER['MAIL_SENT'];
-				$this->FORM_ERROR_MESSAGE = $HC_MAIL_WRAPPER['FORM_ERROR_MESSAGE'];
-				$this->EMAIL_RECIEVED_REPLY = $HC_MAIL_WRAPPER['EMAIL_RECIEVED_REPLY'];
-				$this->ATTACHMENT_ERROR = $HC_MAIL_WRAPPER['ATTACHMENT_ERROR'];
-				$this->CONNECTION_TEST = $HC_MAIL_WRAPPER['CONNECTION_TEST'];
-				if (trim($this->customReturnMessage) == 'Thanks for contacting us!') {
-					$this->customReturnMessage = $HC_MAIL_WRAPPER['customReturnMessage'];
-				}
+			switch ($this->language) {
+				case 'fr':
+					// include our french language file and suppress potential warnings/errors
+					@include 'language/mail-main.lang-fr.php';
+					// Recasting language variables
+					$this->MAIL_UNKNOWN_ERROR = $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'];
+					$this->MAIL_TECH_ERROR = $HC_MAIL_WRAPPER['MAIL_TECH_ERROR'];
+					$this->MAIL_ERROR = $HC_MAIL_WRAPPER['MAIL_ERROR'];
+					$this->MAIL_ERROR_PREFIX = $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'];
+					$this->MAIL_SENT = $HC_MAIL_WRAPPER['MAIL_SENT'];
+					$this->FORM_ERROR_MESSAGE = $HC_MAIL_WRAPPER['FORM_ERROR_MESSAGE'];
+					$this->EMAIL_RECIEVED_REPLY = $HC_MAIL_WRAPPER['EMAIL_RECIEVED_REPLY'];
+					$this->ATTACHMENT_ERROR = $HC_MAIL_WRAPPER['ATTACHMENT_ERROR'];
+					$this->CONNECTION_TEST = $HC_MAIL_WRAPPER['CONNECTION_TEST'];
+					if (trim($this->customReturnMessage) == 'Thanks for contacting us!') {
+						$this->customReturnMessage = $HC_MAIL_WRAPPER['customReturnMessage'];
+					}
+					break;
+				default:
+				case 'en':
+					// include our english language file and suppress potential warnings/errors
+					@include 'language/mail-main.lang-en.php';
+					// Recasting language variables
+					$this->MAIL_UNKNOWN_ERROR = $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'];
+					$this->MAIL_TECH_ERROR = $HC_MAIL_WRAPPER['MAIL_TECH_ERROR'];
+					$this->MAIL_ERROR = $HC_MAIL_WRAPPER['MAIL_ERROR'];
+					$this->MAIL_ERROR_PREFIX = $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'];
+					$this->MAIL_SENT = $HC_MAIL_WRAPPER['MAIL_SENT'];
+					$this->FORM_ERROR_MESSAGE = $HC_MAIL_WRAPPER['FORM_ERROR_MESSAGE'];
+					$this->EMAIL_RECIEVED_REPLY = $HC_MAIL_WRAPPER['EMAIL_RECIEVED_REPLY'];
+					$this->ATTACHMENT_ERROR = $HC_MAIL_WRAPPER['ATTACHMENT_ERROR'];
+					$this->CONNECTION_TEST = $HC_MAIL_WRAPPER['CONNECTION_TEST'];
+					if (trim($this->customReturnMessage) == 'Thanks for contacting us!') {
+						$this->customReturnMessage = $HC_MAIL_WRAPPER['customReturnMessage'];
+					}
+					break;
 			}
 		}
 		// Check if host was supplied
