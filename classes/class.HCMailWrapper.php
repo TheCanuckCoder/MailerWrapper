@@ -17,7 +17,7 @@ namespace HCMailer2017;
  * @link 		http://gitlab.ssc.etg.gc.ca/sustaining-applications/CSB-PHPMailerWrapper-SMTP-MAIL-SENDMAIL-2017
  * @license 	http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  *
- * @version: 	Beta (1.01RC)
+ * @version: 	Beta (1.10RC)
  * @todo 		None
  *
  * These application defaults are:
@@ -162,7 +162,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	private $filesUploaded = array();
 	private $refererEmail = array('canada.ca', 'hc-sc.gc.ca', 'list.hc-sc.gc.ca', 'chemicalsubstanceschimiques.gc.ca'); // list of email domain names
 	private $refererSite = array('mailer.dev', 'canada.ca', 'web.hc-sc.gc.ca', 'www.hc-sc.gc.ca', 'hc-sc.gc.ca','www.sc-hc.gc.ca/','sc-hc.gc.ca/', '205.193.190.11'); // list of site domain names
-	private $versionInfo = 'Version 1.0 (Beta)';
+	private $versionInfo = 'Version 1.10 RC';
 	private $logger = NULL;
 	private $logActions = false;
 	private $logType = 'file';

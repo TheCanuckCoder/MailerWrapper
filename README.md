@@ -2,7 +2,7 @@ Author: Steven Scharf
 
 Project: PHP Mailer Extension Wrapper for E-mail Tranformation Initiative (ETI).
 
-State: Beta v1.01 RC (Release Candidate)
+State: Beta v1.10 RC (Release Candidate)
 
 Contact: steven.scharf@canada.ca
 
