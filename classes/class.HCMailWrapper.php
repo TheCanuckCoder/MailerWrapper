@@ -70,7 +70,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	public $MAIL_ERROR = 'Mail error, please contact the site administrator.';
 	public $MAIL_ERROR_PREFIX = 'Mailer error: ';
 	public $MAIL_SENT = 'Your message has been sent.';
-	public $FORM_ERROR_MESSAGE = 'There was an error with your form, see the errors below and correct them to proceed.';
+	public $FORM_ERROR_MESSAGE = "There was an unknown error attaching a file to the e-mail. Make sure your filename is less than 255 characters long.";
 	public $EMAIL_RECIEVED_REPLY = "This is an auto-generated e-mail; please do not reply.\r\n Your message has been received by the Web site administrator and is being forwarded to a subject-matter expert for consideration and a timely response.\r\n Thank you for your interest in Health Canada Online.";
 	public $ATTACHMENT_ERROR = "Invalid file extension, please select a file that matches one of the following extensions: ";
 	public $CONNECTION_TEST = "Connection Test is Active, no e-mails will be sent (SMTP Only).";
@@ -156,7 +156,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	private $fileContents;
 	private $uploads_dir = './../uploads/';
 	private $allowed_extensions = array('gif','png','jpg','jpeg','doc','docx','pdf','xls','xlsx');
-	private $excluded_extensions = array('exe', 'php', 'phtml', 'py', 'js', 'asp', 'php3', 'php4', 'php5', 'phps', 'jsp', 'sh', 'cgi', 'htm', 'html', 'shtml', 'pl', 'rar');
+	private $excluded_extensions = array('exe', 'php', 'phtml', 'py', 'js', 'asp', 'php3', 'php4', 'php5', 'phps', 'jsp', 'sh', 'cgi', 'htm', 'html', 'shtml', 'pl', 'rar', 'htaccess');
 	private $sendErrorReport = NULL;
 	private $fileError = true;
 	private $filesUploaded = array();
@@ -166,6 +166,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	private $logger = NULL;
 	private $logActions = false;
 	private $logType = 'file';
+	private $arguments;
 	private static $connTest = 0;
 	private static $reqFieldsStatic;
 	/*
@@ -179,24 +180,36 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		$this->__construct();
 	}
 	/*
-	 * Construct Method, all that's needed to invoke the mailer
+	 * Construct Method
 	 * NOTE: Should be changed to just __construct for PHP7 as it is
 	 * deprecated (not removed) from that version. For PHP 5.3 or lower
 	 * than 7. I've created a failsafe callback to the named method to
 	 * ensure it loads as required.
 	 *
-	 * @description This does all the work to send emails
+	 * @description Sets up the arguments for the mailer
 	 *
-	 * @return string
+	 * @return void
 	 */
 	public function __construct() {
 		$this->logger = new MailLogger();
 		// Calling PHPMailer Construct
 		parent::__construct();
-		// Checking arguments submitted
 		$this->numberOfArgs = func_num_args();
 		$this->getArgs = func_get_args();
-		$arguments = $this->getArgs;
+		$this->arguments = $this->getArgs;
+	}
+	/*
+	 * Initializer Method, all that's needed to invoke the mailer
+	 *
+	 * @description This does all the work to send emails
+	 *
+	 * @return string
+	 */
+	public function init() {
+		// Getting arguments submitted
+		// In __construct
+		$arguments = $this->arguments;
+		$return = '';
 		if (isset($arguments[0])) {
 			$arguments = (object)$arguments[0]; // getting the first and only required argument
 			$this->_writeJSFunctions($arguments);
@@ -301,7 +314,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 					$this->setBody($arguments);
 					// Check if we are just testing the connection
 					// Calling output method
-					$this->output();
+					$return = $this->output();
 					// Check if we are sending a custom reply message
 					if (isset($arguments->send_reply_message) && $arguments->send_reply_message === true) {
 						$this->sendReplyMessage = $arguments->send_reply_message;
@@ -329,6 +342,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			// Invoke the tech error method (see method for details)
 			$this->_techError(); 
 		}
+		return $return;
 	}
 	/*
 	 * Connection switching depending on 
@@ -600,7 +614,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 				// which turns the object set 
 				// into a string to echo out
 				// messages, errors and warnings
-				$this->__toString();
+				return $this->__toString();
 			} else if (isset($this->returnType) && $this->returnType == 'form_error') {
 				// return message (user will need to echo this)
 				$this->errorType = 'form_error';
@@ -608,7 +622,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 				// which turns the object set 
 				// into a string to echo out
 				// messages, errors and warnings
-				$this->__toString();
+				return $this->__toString();
 			} else if (isset($this->returnType) && $this->returnType == 'debug') {
 				// Debug data
 				$html = '<pre>';
@@ -617,11 +631,11 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 				return $html;
 			} else {
 				// Invoke the tech error method (see method for details)
-				$this->_techError();
+				return $this->_techError();
 			}
 		} else {
 			// Invoke the send failure method (see method for details)
-			$this->_sendFailure();
+			return $this->_sendFailure();
 		}
 	}
 	/*
@@ -743,15 +757,18 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		}
 		// Set remaining mailer settings
 		$this->replySent = true; // must be set to avoid infinite loops
-		$mail = $this->__construct($objectOfInfo); // send e-mail
+		$build = $this->__construct($objectOfInfo); // prepare the e-mail
+		$mail = $this->init(); // initializing the mailer
 		$data = array();
 		$to = '';
+		$email = '';
+		$name = '';
 		$i = 0;
 		if (isset($objectOfInfo->to) && is_array($objectOfInfo->to)) {
 			$email = key($objectOfInfo->to);
 			$name = $objectOfInfo->to[$email];
 		}
-		self::_logActions($this->logActions, 'info', 'Email Reply Message Sent to: ' . $name . '<' . $email . '> on ' . date('M d, Y') . PHP_EOL . PHP_EOL, $data, 'misc', 'file');
+		self::_logActions($this->logActions, 'info', 'Email Reply Message Sent to: ' . $name . '<' . $email . '> on ' . date('M d, Y') . ' @ ' . date('h:i:s A') . PHP_EOL . PHP_EOL, $data, 'misc', 'file');
 		// Return message (if any exist)
 		return $mail;
 	}
@@ -864,11 +881,11 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	 *   Returns errors related to attachments
 	 */
 	protected function _attachmentError() {
-		$message = 'There was an unknown error attaching a file to the e-mail. Make sure the folder where files are uploaded has the proper permissions.' . PHP_EOL;
+		$message = 'There was an unknown error attaching a file to the e-mail. Make sure the folder where files are uploaded has the proper permissions and your filename is less than 255 character long.' . PHP_EOL;
 		$data = array();
 		self::_logActions($this->logActions, 'info', $message, $data, 'misc', $this->logType);
 		$this->errorType = 'attachment'; // error type encountered
-		// calls the __toStrng() function 
+		// calls the __toString() function 
 		// which turns the object set 
 		// into a string to echo out
 		// messages, errors and warnings
@@ -1169,16 +1186,32 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 				$filetype = $usefile["type"];
 				$filesize = $usefile["size"];
 				$filename = $usefile["name"];
-				$ext = pathinfo($filename, PATHINFO_EXTENSION);
+				$file_extensions = explode(".", $filename);
+				$i = 0;
+				$ext = '';
+				foreach ($file_extensions as $extension) {
+					if ($i > 0) {
+						// Overwritten until we get 
+						// Our last extension 
+						// This effectively removes 
+						// excess extension which could
+						// be used to exploit an environment
+						$ext = $extension;
+					}
+					$i++;
+				}
+				// Getting the temporary file name
 				$filetemp = $usefile["tmp_name"];
 				// If it does not exceed file size
 				// Attach file
-				if ($this->_fileSize($filesize) && in_array($ext, $this->allowed_extensions) && !in_array($ext, $this->excluded_extensions)) {
+				// Check filename length
+				// Sould not exceed 255 characters (with extension)
+				if (strlen($file_extensions[0].$ext) < 256 && $this->_fileSize($filesize) && in_array($ext, $this->allowed_extensions) && !in_array($ext, $this->excluded_extensions)) {
 					// Moving uploaded file to the upload directory
-					if (move_uploaded_file($filetemp, "$this->uploads_dir/$filename")) {
+					if (move_uploaded_file($filetemp, "$this->uploads_dir/$file_extensions[0].$ext")) {
 						$this->fileError = false;
-						$this->filesUploaded[] = $this->uploads_dir . '/' . $filename;
-						$this->addAttachment("$this->uploads_dir/$filename"); // adding attachment to e-mail
+						$this->filesUploaded[] = $this->uploads_dir . '/' . $file_extensions[0] . '.' . $ext;
+						$this->addAttachment("$this->uploads_dir/$file_extensions[0].$ext"); // adding attachment to e-mail
 					}
 					// Remove the image field from the required fields
 					// If it was a required field
@@ -1388,7 +1421,10 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	 * Filesize method
 	 *
 	 * @access private
-	 * @description Checks filesize
+	 * @description Checks filesize and ensures that it doesn't exceed servers
+	 *    maximum upload size, even if you set a limit higher than the server
+	 *    this function will only use the lowest max
+	 *    (upload_max_filesize or max_file_size from Array/Object when configuring this mailer)
 	 *
 	 * @see self::_validateEmailSettings() and self::setBody()
 	 *
@@ -1396,15 +1432,40 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	 *   Checks file size and file size limit
 	 */
 	private function _fileSize($filesize) {
+		$upload_max = self::_parse_size(@ini_get('upload_max_filesize'));
 		// Check if we have a valid file size entry, if not default
-		if (!isset($this->maxFileSize) || trim($this->maxFileSize) == '' || !is_int($this->maxFileSize)) {
+		if (!isset($this->maxFileSize) || trim($this->maxFileSize) == '' || !is_int($this->maxFileSize) && $this->maxFileSize <= $upload_max) {
 			$this->maxFileSize = 2000000;
+		} else if ($this->maxFileSize >= $upload_max) {
+			$this->maxFileSize = $upload_max - 50; // taking off 50 bytes
 		}
 		// Check file size
 		if ($filesize > $this->maxFileSize) {
 			return false;
 		} else {
 			return true;
+		}
+	}
+	/*
+	 * Parse size for ini_get('upload_max_filesize');
+	 *
+	 * @access private
+	 * @description Parses the upload_max_filesize into 
+	 *     useable number for comparison
+	 *
+	 * @see self::_fileSize() and self::_validateEmailSettings()
+	 *
+	 * @return integer
+	 *   Returns the parsed size as an integer
+	 */
+	private static function _parse_size($size) {
+		$unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
+		$size = preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
+		if ($unit) {
+			// Find the position of the unit in the ordered string which is the power of magnitude to multiply a kilobyte by.
+			return (int)round($size * pow(1024, stripos('bkmgtpezy', $unit[0])));
+		} else {
+			return (int)round($size);
 		}
 	}
 	/*
@@ -1471,6 +1532,14 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			return $this->MAIL_TECH_ERROR;
 		} else if (isset($this->errorType) && $this->errorType != NULL && $this->errorType == 'send_failure') {
 			$theReturn = $this->MAIL_ERROR;
+			// Debug info (needs work)
+			if ($this->debug) {
+				$theReturn = $this->_techError();
+			}
+			// Return
+			return $theReturn;
+		} else if (isset($this->errorType) && $this->errorType != NULL && $this->errorType == 'filenamelength') {
+			$theReturn = $this->FILENAME_LENGTH_ERROR;
 			// Debug info (needs work)
 			if ($this->debug) {
 				$theReturn = $this->_techError();

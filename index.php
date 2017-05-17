@@ -60,7 +60,7 @@ $arrayOfInfo = array(
 								array('steven.scharf@canada.ca' => 'Steven Scharf'), 
 		'to' 														   	// To E-mail (associative array with key as email, 
 																		// value as name - limit 10)
-							 => array('steven.scharf@hc-sc.gc.ca' => 'S. Scharf'),			
+							 => array('steven.scharf@canada.ca' => 'S. Scharf'),			
 		'replyto' 			 =>  								   		// Reply-To E-mail
 								array('steven.scharf@canada.ca' => 'Steven Scharf'),
 		'send_reply_message' => true,							   		// Send reply (confirmation) e-mail when they successfully send one
@@ -199,7 +199,8 @@ echo $js;
 if (isset($_POST['submit'])) {
 	// Make the call to mailer
 	$mailer = new HCMailer2017\HCMailWrapper($arrayOfInfo); // invoking this mailer and adding the object/array info to it
-	echo $mailer; // show us what string the mailer returns (if any, won't work on redirects). 
+	$message = $mailer->init(); // show us what string the mailer returns (if any, won't work on redirects).
+	echo $message;
 }
 ?>
         <h1>Request Publication</h1>
@@ -236,3 +237,57 @@ if (isset($_POST['submit'])) {
 		
 </body>
 </html>
+<?php
+//require_once "classes/class.Ping.php";
+/*
+$ping = new JJG\Ping('smtp.ctst.email-courriel.canada.ca');
+$ping->setPort(587);
+echo 'smtp.ctst.email-courriel.canada.ca: ' . $ping->ping('fsockopen') . '<br>';
+$ping = new JJG\Ping('cbc.ca');
+echo 'cbc.ca: ' . $ping->ping('fsockopen') . '<br><br>';
+// Function to check response time
+function pingDomain($domain, $port){
+    $starttime = microtime(true);
+    $file      = @fsockopen ($domain, $port, $errno, $errstr, 10);
+    $stoptime  = microtime(true);
+    $status    = 0;
+
+    if (!$file) $status = -1;  // Site is down
+    else {
+        fclose($file);
+        $status = ($stoptime - $starttime) * 1000;
+        $status = floor($status);
+    }
+    return $errstr . ' ' . $status;
+}
+echo 'smtp.ctst.email-courriel.canada.ca: ' . pingDomain('smtp.ctst.email-courriel.canada.ca', 587) . '<br>';
+echo 'LAP-PROD-01: ' . pingDomain('LAP-PROD-01', 80) . '<br>';
+echo 'cbc.ca: ' . pingDomain('cbc.ca', 80) . '<br>';
+echo 'sad-mysql-002: ' . pingDomain('sad-mysql-002', 3306) . '<br>';
+echo '1115.dev: ' . pingDomain('1115.dev', 80) . '<br>';
+function urlExists($url=NULL)  
+{  
+    if($url == NULL) return false;  
+    $ch = curl_init($url);  
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);  
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);  
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+    $data = curl_exec($ch);  
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);  
+    curl_close($ch);  
+    if($httpcode>=200 && $httpcode<300){  
+        return 'Pinged';  
+    } else { 
+		if ($httpcode == 530) {
+			return 'Failed. Code: ' . $httpcode . ' Authentication required'; 
+		} else {
+			return 'Failed. Code: ' . $httpcode; 
+		}
+    }  
+}
+echo 'smtp.ctst.email-courriel.canada.ca: ' . urlExists('smtp.ctst.email-courriel.canada.ca', 587) . '<br>';
+echo 'LAP-PROD-01: ' . urlExists('http://LAP-PROD-01/index.php') . '<br>';
+echo 'www.cbc.ca: ' . urlExists('http://www.cbc.ca') . '<br>';
+echo 'http://mysource.hc-sc.gc.ca/eng/user: ' . urlExists('http://mysource.hc-sc.gc.ca/eng/user') . '<br>';
+*/
+?>
