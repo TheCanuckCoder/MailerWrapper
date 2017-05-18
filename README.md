@@ -1,7 +1,7 @@
 # PHP Mailer Extension Wrapper
 ## Author: Steven Scharf
-Project: PHP Mailer Extension Wrapper
-State: Beta v1.20 RC (Release Candidate)
+## Project: PHP Mailer Extension Wrapper
+## State: Beta v1.20 RC (Release Candidate)
 ### Information
 This is a self-contained script requiring no support or other plugins.
 Included in this is the PHPMailer, the SMTP Class it comes with and PSR Logging.
