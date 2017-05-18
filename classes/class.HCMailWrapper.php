@@ -160,8 +160,8 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	private $sendErrorReport = NULL;
 	private $fileError = true;
 	private $filesUploaded = array();
-	private $refererEmail = array('canada.ca', 'hc-sc.gc.ca'); // list of email domain names
-	private $refererSite = array('mailer.dev'); // list of site domain names
+	private $refererEmail = array('canada.ca', 'hc-sc.gc.ca', 'list.hc-sc.gc.ca', 'chemicalsubstanceschimiques.gc.ca'); // list of email domain names
+	private $refererSite = array('canada.ca', 'web.hc-sc.gc.ca', 'www.hc-sc.gc.ca', 'hc-sc.gc.ca','www.sc-hc.gc.ca/','sc-hc.gc.ca/', '205.193.190.11'); // list of site domain names
 	private $versionInfo = 'Version 1.20 RC';
 	private $logger = NULL;
 	private $logActions = false;
