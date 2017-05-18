@@ -5,7 +5,7 @@
  */
  
 $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'] = "There was an unknown error, please contact the site administrator.";
-$HC_MAIL_WRAPPER['MAIL_TECH_ERROR'] = "There was a technical error, please contact the site administrator.";
+$HC_MAIL_WRAPPER['MAIL_TECH_ERROR'] = "There is a configuration error, please review the documentation to set this up correctly.";
 $HC_MAIL_WRAPPER['MAIL_ERROR'] = "Mail error, please contact the site administrator.";
 $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'] = 'Mailer error: ';
 $HC_MAIL_WRAPPER['MAIL_SENT'] = 'Your message has been sent.';

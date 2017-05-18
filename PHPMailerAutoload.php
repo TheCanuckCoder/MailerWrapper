@@ -25,15 +25,20 @@ namespace HCMailer2017;
 // Autoload function PSR-4
 function PHPMailerAutoload($classname) {
 	$file = explode('\\',$classname);
+	// Require all files in config folder
+	$filename = dirname(__FILE__).DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'class.'.$file[count($file) - 1].'.php';
+    if (is_readable($filename)) {
+        require_once $filename;
+    }
     // require all files in classes folder
     $filename = dirname(__FILE__).DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$file[count($file) - 1].'.php';
     if (is_readable($filename)) {
-        require $filename;
+        require_once $filename;
     }
 	// Require all files in Psr\Log folder
 	$filename = dirname(__FILE__).DIRECTORY_SEPARATOR.'Psr'.DIRECTORY_SEPARATOR.'Log'.DIRECTORY_SEPARATOR.$file[count($file) - 1].'.php';
     if (is_readable($filename)) {
-        require $filename;
+        require_once $filename;
     }
 }
 // Check PHP Version, load accordingling

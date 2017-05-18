@@ -54,7 +54,7 @@ require_once 'PHPMailerAutoload.php';
  *
  */
 
-// Set array of Info (Largest Sample)			
+// Set array of Info (Larg Sample)			
 $arrayOfInfo = array(
 		'from' 				 => 									   	// From E-mail (Limit 1)
 								array('steven.scharf@canada.ca' => 'Steven Scharf'), 
@@ -66,7 +66,7 @@ $arrayOfInfo = array(
 		'send_reply_message' => true,							   		// Send reply (confirmation) e-mail when they successfully send one
 		'reply_subject'		 => 'Thanks for contacting us!',			// Subject of the automated reply when submission is successful 
 		'subject' 			 => 'PHPMailer test', 						// Subject of your e-mail
-		'html_body' 		 => 'html_files/contents.html', 						// html body (can be .html file or html markup)
+		'html_body' 		 => 'templates/contents.html', 						// html body (can be .html file or html markup)
 		'nonhtml_body' 		 => 'This is a plain-text message body', 	// plain text body
 		//'attachment' 													// e-mail attachment (relative path), must reside on same domain
 							 //=> 'images/existingticket.png', 			// string or indexed array
@@ -105,59 +105,21 @@ $arrayOfInfo = array(
 		'logType' 			 => 'file'									// 
 		);
 
-// Set object of info (Largest Sample)				
+// Set object of info (Smallest Sample)				
 $objectOfInfo = new stdClass(); 	// initialize object (required), all the rest is self explanatory
-$objectOfInfo->host 				= 'localhost'; 	// usually localhost
-$objectOfInfo->port 				= 25; 										// port for mail server, should be port 587 for smtp mail_method
-$objectOfInfo->username 			= '';										// username for mail server
-$objectOfInfo->password 			= ''; 										// password for mail server
 $objectOfInfo->from																// From E-mail (limit 1)
 									= array('steven.scharf@canada.ca' => 'Steven Scharf');
 $objectOfInfo->to 																// To E-mail (associative array with key as email, 
 																				// value as name - limit 10)
-									= array('admin@hc-sc.gc.ca' => 'Site Admin'); 			
-//$objectOfInfo->replyto 														// Reply-To E-mail
-									//= array('steven.scharf@canada.ca' => 'Steven Scharf');
+									= array('steven.scharf@hc-sc.gc.ca' => 'Site Admin'); 			
 $objectOfInfo->send_reply_message	= true;										// Send reply (confirmation) e-mail when they successfully send one
-$objectOfInfo->reply_message		= 											// This is the reply message e-mailed to the user as 
-																				// confirmation of their email being sent to the subject matter expert.
-										"This is an auto-generated e-mail; please do not reply." . PHP_EOL . 
-										"Your message has been received by the Web site administrator and is being forwarded to a subject-matter expert for consideration and a timely response." . PHP_EOL . 
-										"Thank you for your interest in Health Canada Online.";
-//$objectOfInfo->redirect 			= '/contact/thankyou-merci-fra.php';		// The page to redirect to if form submission is successful
 $objectOfInfo->subject 				= 'PHPMailer test'; 						// Subject of your e-mail
 $objectOfInfo->html_body 														// html body (can be .html file or html markup)
 									= '<p>Someone has requested information.</p>'; 							
-$objectOfInfo->nonhtml_body 		= 'This is a plain-text message body'; 		// plain text body
-//$objectOfInfo->attachment 													// e-mail attachment (relative path), must reside on same domain
-									//= array('images/existingticket.png', 'images/mail_wizard.gif'); // string or indexed array
-$objectOfInfo->allowed_extensions 	= array('gif', 'jpg', 'png');								// Allowed extensions for upload
-$objectOfInfo->mail_method			= 'mail'; 									// can be mail, sendmail or smtp (default)
-$objectOfInfo->encryption			= 'tls'; 									// use - ssl (deprecated) or tls (default)
-$objectOfInfo->authorization		= false; 									// should be set to true (true|false)
-$objectOfInfo->ipv6compat			= false;									// should be set to false (true|false)
-$objectOfInfo->timezone				= 'America/Toronto';						// timezones: http://php.net/manual/en/timezones.php
 $objectOfInfo->language				= 'en';										// Language: en|fr
-$objectOfInfo->openList				= '<ol>';									// When errors appear, the opening wrapper for the error list
-$objectOfInfo->closeList			= '</ol>';									// When errors appear, the closing wrapper for the error list
-$objectOfInfo->prefixListItem		= '<li>';									// When errors appear, the opening wrapper for the list item
-$objectOfInfo->postListItem			= '</li>';									// When errors appear, the closing wrapper for the list item
 $objectOfInfo->all_fields														// All fields we should look for and post in e-mail
 									= 'realname|Name,email|Email,message|Message';
 $objectOfInfo->required_fields		= 'realname|Name,email|Email';				// Required fields for validation
-$objectOfInfo->refererSite			= 											// Referer sites we will allow to use this form
-									  array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', '1115.dev');
-$objectOfInfo->refererEmail			= 											// Referer Emails which are allowed to send to
-									  array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev');
-$objectOfInfo->debug				= false;										// Turn debugging on/off, prod should be false (true|false)
-$objectOfInfo->testConnection		= false;									// Determine if you're just testing the connection (SMTP Only)
-$objectOfInfo->SMTPDebugLevel 		= 4;										// 0 = No debug output, 1 = Client commands, 
-																				// 2 = Client commands and server responses (default), 
-																				// 3 = As DEBUG_SERVER plus connection status, 
-																				// 4 = Low-level data output, all messages
-
-$objectOfInfo->logActions 			= true;
-$objectOfInfo->logType 				= 'both';
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -189,7 +151,7 @@ $objectOfInfo->logType 				= 'both';
 </style>
 <?php
 // Add JavaScript error checker from the Mail Wrapper (optional)
-$js = HCMailer2017\HCMailWrapper::_writeJSFunctions($arrayOfInfo);
+$js = HCMailer2017\HCMailWrapper::_writeJSFunctions($objectOfInfo);
 echo $js;
 ?>
 </head>
@@ -237,57 +199,3 @@ if (isset($_POST['submit'])) {
 		
 </body>
 </html>
-<?php
-//require_once "classes/class.Ping.php";
-/*
-$ping = new JJG\Ping('smtp.ctst.email-courriel.canada.ca');
-$ping->setPort(587);
-echo 'smtp.ctst.email-courriel.canada.ca: ' . $ping->ping('fsockopen') . '<br>';
-$ping = new JJG\Ping('cbc.ca');
-echo 'cbc.ca: ' . $ping->ping('fsockopen') . '<br><br>';
-// Function to check response time
-function pingDomain($domain, $port){
-    $starttime = microtime(true);
-    $file      = @fsockopen ($domain, $port, $errno, $errstr, 10);
-    $stoptime  = microtime(true);
-    $status    = 0;
-
-    if (!$file) $status = -1;  // Site is down
-    else {
-        fclose($file);
-        $status = ($stoptime - $starttime) * 1000;
-        $status = floor($status);
-    }
-    return $errstr . ' ' . $status;
-}
-echo 'smtp.ctst.email-courriel.canada.ca: ' . pingDomain('smtp.ctst.email-courriel.canada.ca', 587) . '<br>';
-echo 'LAP-PROD-01: ' . pingDomain('LAP-PROD-01', 80) . '<br>';
-echo 'cbc.ca: ' . pingDomain('cbc.ca', 80) . '<br>';
-echo 'sad-mysql-002: ' . pingDomain('sad-mysql-002', 3306) . '<br>';
-echo '1115.dev: ' . pingDomain('1115.dev', 80) . '<br>';
-function urlExists($url=NULL)  
-{  
-    if($url == NULL) return false;  
-    $ch = curl_init($url);  
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);  
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);  
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
-    $data = curl_exec($ch);  
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);  
-    curl_close($ch);  
-    if($httpcode>=200 && $httpcode<300){  
-        return 'Pinged';  
-    } else { 
-		if ($httpcode == 530) {
-			return 'Failed. Code: ' . $httpcode . ' Authentication required'; 
-		} else {
-			return 'Failed. Code: ' . $httpcode; 
-		}
-    }  
-}
-echo 'smtp.ctst.email-courriel.canada.ca: ' . urlExists('smtp.ctst.email-courriel.canada.ca', 587) . '<br>';
-echo 'LAP-PROD-01: ' . urlExists('http://LAP-PROD-01/index.php') . '<br>';
-echo 'www.cbc.ca: ' . urlExists('http://www.cbc.ca') . '<br>';
-echo 'http://mysource.hc-sc.gc.ca/eng/user: ' . urlExists('http://mysource.hc-sc.gc.ca/eng/user') . '<br>';
-*/
-?>

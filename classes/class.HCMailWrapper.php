@@ -17,7 +17,7 @@ namespace HCMailer2017;
  * @link 		http://gitlab.ssc.etg.gc.ca/sustaining-applications/CSB-PHPMailerWrapper-SMTP-MAIL-SENDMAIL-2017
  * @license 	http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  *
- * @version: 	Beta (1.10RC)
+ * @version: 	Beta (1.20RC)
  * @todo 		None
  *
  * These application defaults are:
@@ -162,7 +162,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	private $filesUploaded = array();
 	private $refererEmail = array('canada.ca', 'hc-sc.gc.ca'); // list of email domain names
 	private $refererSite = array('mailer.dev'); // list of site domain names
-	private $versionInfo = 'Version 1.10 RC';
+	private $versionInfo = 'Version 1.20 RC';
 	private $logger = NULL;
 	private $logActions = false;
 	private $logType = 'file';
@@ -313,7 +313,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 					$this->setBody($arguments);
 					// Check if we are just testing the connection
 					// Calling output method
-					$return = $this->output();
+					$return = $this->outPut();
 					// Check if we are sending a custom reply message
 					if (isset($arguments->send_reply_message) && $arguments->send_reply_message === true) {
 						$this->sendReplyMessage = $arguments->send_reply_message;
@@ -324,22 +324,22 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 						$this->emailRecievedReply();
 					}
 				} else if ($validateEmailSettings && $this->testConnection) {
-					echo '<p>' . $this->CONNECTION_TEST . '</p>';
+					$return = '<p>' . $this->CONNECTION_TEST . '</p>';
 				} else if (!$validateEmailSettings && $this->testConnection) {
 					// Invoke the tech error method (see method for details)
-					echo '<p>' . $this->CONNECTION_TEST . '</p>';
-					$this->_techError();
+					$return = '<p>' . $this->CONNECTION_TEST . '</p>';
+					$return .= $this->_techError();
 				} else if (!$validateEmailSettings) {
 					// Invoke the tech error method (see method for details)
-					$this->_techError(); 
+					$return = $this->_techError(); 
 				}
 			} else { // invalid arguments
 				// Invoke the tech error method (see method for details)
-				$this->_techError(); 
+				$return = $this->_techError(); 
 			}
 		} else { // invalid arguments
 			// Invoke the tech error method (see method for details)
-			$this->_techError(); 
+			$return = $this->_techError(); 
 		}
 		return $return;
 	}
@@ -362,33 +362,30 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 	 */
 	private function connectionDetermination($arguments, $attempt = 1) {
 		$config = new \HCMailer2017\ConfigClass();
+		$message = '';
 		$data = array();
 		if ($attempt == 2) {
-			$message = '<strong>Connection Attempt (User 2) #' . self::$connTest . ' (' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
-			MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+			$message .= '<strong>Connection Attempt (User 2) #' . self::$connTest . ' (' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
 			if ($this->connectionSMTPTest(2)) {
-				$message = PHP_EOL . 'Connection Success;' . PHP_EOL;
-				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
-				return true;
+				$message .= PHP_EOL . 'Connection Success;' . PHP_EOL;
+				$return = true;
 			} else {
-				$message = PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
-				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				$message .= PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
+				$return = false;
 			}
-			return false;
-		} else if ($attempt == 1) {
-			$message = '<strong>Connection Attempt (User 1) #' . self::$connTest . '(' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
 			MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+		} else if ($attempt == 1) {
+			$message .= '<strong>Connection Attempt (User 1) #' . self::$connTest . '(' . date('F d, Y h:ia') . '):</strong>' . PHP_EOL . '<strong>Host:</strong> ' . $config->MAIL_HOST . PHP_EOL . PHP_EOL;
 			if ($this->connectionSMTPTest(1)) {
-				$message = PHP_EOL . 'Connection Success;' . PHP_EOL;
-				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
-				return true;
+				$message .= PHP_EOL . 'Connection Success;' . PHP_EOL;
+				$return = true;
 			} else {
-				$message = PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
-				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
+				$message .= PHP_EOL . 'Connection Failure Attempt #' . self::$connTest . ';' . PHP_EOL;
+				$return = false;
 			}
-			return false;
+			MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
 		}
-		return false;
+		return $return;
 	}
 	/*
 	 * Connection testing SMTP
@@ -578,6 +575,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			$this->IsHTML(false);
 			$this->Body = $this->nonhtml_body;
 		}
+		return true;
 	}
 	/*
 	 * outPut method
@@ -821,7 +819,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		// which turns the object set 
 		// into a string to echo out
 		// messages, errors and warnings
-		$this->__toString(); 
+		return $this->__toString(); 
 	}
 	/*
 	 * _attachmentError() method
@@ -841,7 +839,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		// which turns the object set 
 		// into a string to echo out
 		// messages, errors and warnings
-		$this->__toString(); 
+		return $this->__toString(); 
 	}
 	/*
 	 * _attachmentError() method
@@ -860,7 +858,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		// which turns the object set 
 		// into a string to echo out
 		// messages, errors and warnings
-		$this->__toString(); 
+		return $this->__toString(); 
 	}
 	/*
 	 * _sendFailure() method
@@ -879,7 +877,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 		// which turns the object set 
 		// into a string to echo out
 		// messages, errors and warnings
-		$this->__toString();
+		return $this->__toString();
 	}
 	/*
 	 * _is_filepath Method 
@@ -1036,14 +1034,13 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			$this->Port = $arguments->port;
 		}
 		// Encryption system to use
-		$this->SMTPSecure = 'tls';
 		if (isset($arguments->encryption) && trim($arguments->encryption) > '') {
 			$this->SMTPSecure = $arguments->encryption;
 		}
 		// Whether to use SMTP authentication
-		$this->SMTPAuth = false;
-		if (isset($arguments->authorization) && is_bool($arguments->authorization) && $arguments->authorization) {
-			$this->SMTPAuth = true;
+		$this->SMTPAuth = true;
+		if (isset($arguments->authorization) && is_bool($arguments->authorization)) {
+			$this->SMTPAuth = $arguments->authorization;
 		}
 		// Set who the message is to be sent from
 		if (isset($arguments->from)) {
@@ -1241,7 +1238,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 				$this->_mailerUseType();
 				return true;
 			} else {
-				$logFile = @fopen('./tmp/conn1failure.log', 'w');
+				$logFile = @fopen('./logs/conn1failure.log', 'w');
 				@fwrite($logFile, 'Connection 1 is not available. Delete this file when the credentials have changed and authorization is granted.');
 				$message = PHP_EOL . 'Attempting Connection #' . self::$connTest . PHP_EOL;
 				MailLogger::_logActions($this->logActions, 'info', $message, $data, 'connection', $this->logType);
@@ -1252,7 +1249,7 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 					$this->_mailerUseType();
 					return true;
 				} else {
-					$logFile = @fopen('./tmp/conn2failure.log', 'w');
+					$logFile = @fopen('./logs/conn2failure.log', 'w');
 					@fwrite($logFile, 'Connection 2 is not available. Delete this file when the credentials have changed and authorization is granted.');
 					return false;
 				}

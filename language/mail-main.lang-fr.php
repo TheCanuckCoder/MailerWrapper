@@ -5,7 +5,7 @@
  */
  
 $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'] = "Une erreur inconnue s'est produite, veuillez contacter l'administrateur du site.";
-$HC_MAIL_WRAPPER['MAIL_TECH_ERROR'] = "Une erreur technique s'est produite, merci de contacter l'administrateur du site.";
+$HC_MAIL_WRAPPER['MAIL_TECH_ERROR'] = "Il y a une erreur de configuration, veuillez consulter la documentation pour la configurer correctement.";
 $HC_MAIL_WRAPPER['MAIL_ERROR'] = "Erreur de courriel, veuillez contacter l'administrateur du site.";
 $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'] = 'Erreur Mailer:';
 $HC_MAIL_WRAPPER['MAIL_SENT'] = 'Votre message a été envoyé.';

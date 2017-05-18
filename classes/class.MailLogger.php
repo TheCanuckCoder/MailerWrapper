@@ -33,13 +33,16 @@ class MailLogger extends AbstractLogger {
 	* @return void
 	*/
 	public function log($level, $message, array $context = array(), $type = 'email', $log = 'file') {
+		$connection_log = 'logs/connection_log_' . date('m-d-Y') . '.log';
+		$email_log = 'logs/email_log_' . date('m-d-Y') . '.log';
+		$misc_log = 'logs/misc_log_' . date('m-d-Y') . '.log';
 		switch ($type) {
 			case 'email':
 				if ($log == 'file') {
-					$logFile = @fopen('logs/email_log_' . date('m-d-Y') . '.log', 'a+');
+					$logFile = @fopen($email_log, 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 				} else if ($log == 'both') {
-					$logFile = @fopen('logs/email_log_' . date('m-d-Y') . '.log', 'a+');
+					$logFile = @fopen($email_log, 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 					echo strtr(nl2br($message), $context);
 				} else if ($log == 'none') {
@@ -50,10 +53,16 @@ class MailLogger extends AbstractLogger {
 				break;
 			case 'connection':
 				if ($log == 'file') {
-					$logFile = @fopen('logs/connection_log_' . date('m-d-Y') . '.log', 'a+');
+					if (file_exists($connection_log) && filesize($connection_log) > 42000000) { // greater than 42MB
+						unlink($connection_log); // delete log and restart it (could send notification or archive log here if needed)
+					}
+					$logFile = @fopen($connection_log, 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 				} else if ($log == 'both') {
-					$logFile = @fopen('logs/connection_log_' . date('m-d-Y') . '.log', 'a+');
+					if (file_exists($connection_log) && filesize($connection_log) > 42000000) { // greater than 42MB
+						unlink($connection_log); // delete log and restart it (could send notification or archive log here if needed)
+					}
+					$logFile = @fopen($connection_log, 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 					echo strtr(nl2br($message), $context);
 				} else if ($log == 'none') {
@@ -64,10 +73,10 @@ class MailLogger extends AbstractLogger {
 				break;
 			default:
 				if ($log == 'file') {
-					$logFile = @fopen('logs/misc_log_' . date('m-d-Y') . '.log', 'a+');
+					$logFile = @fopen($misc_log, 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 				} else if ($log == 'both') {
-					$logFile = @fopen('logs/misc_log_' . date('m-d-Y') . '.log', 'a+');
+					$logFile = @fopen($misc_log, 'a+');
 					@fwrite($logFile, strtr(strip_tags($message), $context));
 					echo strtr(nl2br($message), $context);
 				} else if ($log == 'none') {
