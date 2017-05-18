@@ -24,8 +24,8 @@ Configuration File (config/class.ConfigClass.php):
 Copy this exactly as displayed below or edit the 'class.ConfigClass.php.dist' 
 file and remove the '.dist' extension and change the values to relate to your 
 connection credentials. More options are set when initializing the Class.
-<?php
 ```
+<?php
 namespace HCMailer2017;
 class ConfigClass extends HCMailWrapper {
 	public $MAIL_HOST = '';	
