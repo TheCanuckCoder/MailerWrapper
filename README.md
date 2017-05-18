@@ -9,7 +9,7 @@ Contact: [Steven Scharf](mailto:steven.scharf@canada.ca)
 #### Debugging
 There are debugging and logging options available.
 
-[See logging for more information.](#more-configuration-options)
+[See logging for more information.](#logs)
 
 There is a file available indicating a connectivity issue if encountered
 named 'conn1failure.log' and 'conn2failure.log'. They provide no real context
