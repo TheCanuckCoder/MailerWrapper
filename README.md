@@ -25,30 +25,22 @@ Copy this exactly as displayed below or edit the 'class.ConfigClass.php.dist'
 file and remove the '.dist' extension and change the values to relate to your 
 connection credentials. More options are set when initializing the Class.
 <?php
-
+```
 namespace HCMailer2017;
-
 class ConfigClass extends HCMailWrapper {
-
-	public $MAIL_HOST = '';
-	
-	public $MAIL_PORT = 587;
-	
-	public $MAIL_USER = '';
-	
-	public $MAIL_PASS = '';
-	
-	public $MAIL_USER2 = '';
-	
-	public $MAIL_PASS2 ='';
-	
+	public $MAIL_HOST = '';	
+	public $MAIL_PORT = 587;	
+	public $MAIL_USER = '';	
+	public $MAIL_PASS = '';	
+	public $MAIL_USER2 = '';	
+	public $MAIL_PASS2 ='';	
 }
-
+```
 
 Other Configuration options:
 
 The following fields are required:
-
+```
 1. from
 
 2. to
@@ -56,12 +48,12 @@ The following fields are required:
 3. subject
 
 4. nonhtml_body (only if html_body is NOT filled in).
-
+```
 
 The rest of the options are optional/defaulted (all options shown below). 
 
 These application defaults are:
-
+```
 host: smtps.ctst.email-courriel.canada.ca
 
 port: 587
@@ -133,3 +125,4 @@ SMTPDebugLevel: 2
 logActions: false
 
 logType: file
+```
