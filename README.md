@@ -98,70 +98,56 @@ The 2 examples below are a large sample and small sample so you can see how a co
 ```php
 // Set array of Info (Larg Sample)			
 $arrayOfInfo = array(
-		'from' 				 => 									   	// From E-mail (Limit 1)
-								array('steven.scharf@canada.ca' => 'Steven Scharf'), 
-		'to' 														   	// To E-mail (associative array with key as email, 
-																		// value as name - limit 10)
-							 => array('steven.scharf@canada.ca' => 'S. Scharf'),			
-		'replyto' 			 =>  								   		// Reply-To E-mail
-								array('steven.scharf@canada.ca' => 'Steven Scharf'),
-		'send_reply_message' => true,							   		// Send reply (confirmation) e-mail when they successfully send one
-		'reply_subject'		 => 'Thanks for contacting us!',			// Subject of the automated reply when submission is successful 
-		'subject' 			 => 'PHPMailer test', 						// Subject of your e-mail
-		'html_body' 		 => 'templates/contents.html', 						// html body (can be .html file or html markup)
-		'nonhtml_body' 		 => 'This is a plain-text message body', 	// plain text body
-		//'attachment' 													// e-mail attachment (relative path), must reside on same domain
-							 //=> 'images/existingticket.png', 			// string or indexed array
-		'allowed_extensions' => array('gif', 'png', 'jpg'),									// Allowed extensions for upload
-		'mail_method' 		 => 'smtp', 								// can be mail, sendmail or smtp (default)
-		'encryption' 		 => 'tls', 									// use - ssl (deprecated) or tls (default)
-		'authorization' 	 => true, 									// should be set to true (true|false)
-		'ipv6compat' 		 => false, 									// should be set to false (true|false)
-		'timezone'			 => 'America/Toronto',						// timezones: http://php.net/manual/en/timezones.php
-		'language'			 => 'en',									// Language: en|fr
-		'openList'			 => '<ol>',									// When errors appear, the opening wrapper for the error list
-		'closeList'			 => '</ol>',								// When errors appear, the closing wrapper for the error list
-		'prefixListItem'	 => '<li>',									// When errors appear, the opening wrapper for the list item
-		'postListItem'		 => '</li>',								// When errors appear, the closing wrapper for the list item
-		'reply_message'												   	// confirmation of their email being sent to the subject matter expert.
-							 => "This is an auto-generated e-mail; please do not reply." . PHP_EOL . 
+		'from' => array('steven.scharf@canada.ca' => 'Steven Scharf'), 
+		'to' => array('steven.scharf@canada.ca' => 'S. Scharf'),			
+		'replyto' => array('steven.scharf@canada.ca' => 'Steven Scharf'),
+		'send_reply_message' => true, // Send reply (confirmation) e-mail when they successfully send one
+		'reply_subject' => 'Thanks for contacting us!', // Subject of the automated reply when submission is successful 
+		'subject' => 'PHPMailer test', // Subject of your e-mail
+		'html_body' => 'templates/contents.html', // html body (can be .html file or html markup)
+		'nonhtml_body' => 'This is a plain-text message body', // plain text body
+		//'attachment' => 'images/existingticket.png', // string or indexed array
+		'allowed_extensions' => array('gif', 'png', 'jpg'), // Allowed extensions for upload
+		'mail_method' => 'smtp', // can be mail, sendmail or smtp (default)
+		'encryption' => 'tls', // use - ssl (deprecated) or tls (default)
+		'authorization' => true, // should be set to true (true|false)
+		'ipv6compat' => false, // should be set to false (true|false)
+		'timezone' => 'America/Toronto', // timezones: http://php.net/manual/en/timezones.php
+		'language' => 'en', // Language: en|fr
+		'openList' => '<ol>', // When errors appear, the opening wrapper for the error list
+		'closeList' => '</ol>', // When errors appear, the closing wrapper for the error list
+		'prefixListItem' => '<li>', // When errors appear, the opening wrapper for the list item
+		'postListItem' => '</li>', // When errors appear, the closing wrapper for the list item
+		'reply_message' => "This is an auto-generated e-mail; please do not reply." . PHP_EOL . 
 							    "Your message has been received by the Web site administrator and is being forwarded to a subject-matter expert for consideration and a timely response." . PHP_EOL . 
 							    "Thank you for your interest in Health Canada Online.",
-		//'redirect'		 => 'somedir/somepage.php',
-		'max_file_size'		 => 2000000,
-		'all_fields'													// All fields we should look for and post in e-mail
-							 => 'realname|Name,email|Email,message|Message',
-		'required_fields'	 => 'realname|Name,email|Email,fileAttach|File',			// Required fields for validation
-		'isHtml'			 => true,									// E-mails sent can be HTML or Plain-text
-		'refererSite' 		 => 										// 
-								array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', 'sad-lap-pub01', '1115.dev'),
-		'refererEmail' 		 => 										//
-								array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', 'sad-lap-pub01', '1115.dev'),
-		'debug'				 => false, 									// Turn debugging on/off, prod should be false (true|false)
-		'testConnection'	 => false,									// Determine if you're just testing the connection (SMTP Only)
-		'SMTPDebugLevel'	 => 0,										// 0 = No debug output, 1 = Client commands, 
-																		// 2 = Client commands and server responses (default), 
-																		// 3 = As DEBUG_SERVER plus connection status, 
-																		// 4 = Low-level data output, all messages
-		'logActions'		 => true,									// 
-		'logType' 			 => 'file'									// 
+		//'redirect' => 'somedir/somepage.php',
+		'max_file_size' => 2000000,
+		'all_fields' => 'realname|Name,email|Email,message|Message', // All fields in form
+		'required_fields' => 'realname|Name,email|Email,fileAttach|File', // Required fields for validation
+		'isHtml' => true, // E-mails sent can be HTML or Plain-text
+		'refererSite' => array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', 'sad-lap-pub01', '1115.dev'),
+		'refererEmail' => array('canada.ca', 'hc-sc.gc.ca', 'mailer.dev', 'sad-lap-pub01', '1115.dev'),
+		'debug' => false, // Turn debugging on/off, prod should be false (true|false)
+		'testConnection' => false, // Determine if you're just testing the connection (SMTP Only)
+		'SMTPDebugLevel' => 0, 	// 0 = No debug output, 1 = Client commands, 
+								// 2 = Client commands and server responses (default), 
+								// 3 = As DEBUG_SERVER plus connection status, 
+								// 4 = Low-level data output, all messages
+		'logActions' => true,
+		'logType' => 'file'
 		);
 ```
 ##### Example 2
 ```php
 // Set object of info (Smallest Sample)				
 $objectOfInfo = new stdClass(); 	// initialize object (required), all the rest is self explanatory
-$objectOfInfo->from																// From E-mail (limit 1)
-									= array('steven.scharf@canada.ca' => 'Steven Scharf');
-$objectOfInfo->to 																// To E-mail (associative array with key as email, 
-																				// value as name - limit 10)
-									= array('steven.scharf@hc-sc.gc.ca' => 'Site Admin'); 			
-$objectOfInfo->send_reply_message	= true;										// Send reply (confirmation) e-mail when they successfully send one
-$objectOfInfo->subject 				= 'PHPMailer test'; 						// Subject of your e-mail
-$objectOfInfo->html_body 														// html body (can be .html file or html markup)
-									= '<p>Someone has requested information.</p>'; 							
-$objectOfInfo->language				= 'en';										// Language: en|fr
-$objectOfInfo->all_fields														// All fields we should look for and post in e-mail
-									= 'realname|Name,email|Email,message|Message';
-$objectOfInfo->required_fields		= 'realname|Name,email|Email';				// Required fields for validation
+$objectOfInfo->from = array('steven.scharf@canada.ca' => 'Steven Scharf');
+$objectOfInfo->to = array('steven.scharf@hc-sc.gc.ca' => 'Site Admin'); 			
+$objectOfInfo->send_reply_message = true; // Send reply (confirmation) e-mail when they successfully send one
+$objectOfInfo->subject = 'PHPMailer test'; // Subject of your e-mail
+$objectOfInfo->html_body = '<p>Someone has requested information.</p>'; 							
+$objectOfInfo->language = 'en'; // Language: en|fr
+$objectOfInfo->all_fields = 'realname|Name,email|Email,message|Message'; // All fields in form
+$objectOfInfo->required_fields = 'realname|Name,email|Email'; // Required fields for validation
 ```
