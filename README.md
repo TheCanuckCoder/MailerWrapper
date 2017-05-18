@@ -10,7 +10,7 @@ Contact: [Steven Scharf](mailto:steven.scharf@canada.ca)
 There are debugging and logging options available.
 
 [See logging for more information.](#logs)
-
+#### Connectivity Testing
 There is a file available indicating a connectivity issue if encountered
 named 'conn1failure.log' and 'conn2failure.log'. They provide no real context
 of the issue, it's there to let you know a connection problem exists
