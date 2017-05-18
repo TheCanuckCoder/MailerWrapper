@@ -3,11 +3,13 @@
 ### State: Beta v1.20 RC (Release Candidate)
 #### Information
 This is a self-contained script requiring no support or other plugins.
-Included in this is the PHPMailer, the SMTP Class it comes with and PSR Logging.
+Included in this is the PHPMailer, the SMTP Class and PSR Logging Class.
 
 Contact: [Steven Scharf](mailto:steven.scharf@canada.ca)
 #### Debugging
 There are debugging and logging options available.
+
+[See logging for more information.](#more-configuration-options)
 
 There is a file available indicating a connectivity issue if encountered
 named 'conn1failure.log' and 'conn2failure.log'. They provide no real context
@@ -20,7 +22,7 @@ to check if the connection was down temporarily.
 #### Logs
 All other log information is in the 'logs' folder.
 #### Configuration File
-Location: config/class.ConfigClass.php
+Location: ```/config/class.ConfigClass.php```
 
 Copy this exactly as displayed below or edit the 'class.ConfigClass.php.dist' 
 file and remove the '.dist' extension and change the values to relate to your 
@@ -50,12 +52,12 @@ The rest of the options are optional/defaulted (all options shown below).
 
 These application defaults are:
 ```
-host: smtps.ctst.email-courriel.canada.ca
-port: 587
+host: See class.HCMailWrapper.php (if accessible)
+port: See class.HCMailWrapper.php (if accessible)
 username: See class.HCMailWrapper.php (if accessible)
 password: See class.HCMailWrapper.php (if accessible)
-from:
-to: 
+from: NULL
+to: NULL
 replyto: NULL
 send_reply_message: true
 reply_subject: NULL
