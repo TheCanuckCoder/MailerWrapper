@@ -14,6 +14,7 @@ namespace HCMailer2017;
  * @author	 	Steven Scharf (steven.scharf@canada.ca)
  * @since		2017/04/11
  * @access		public
+ * @license		MIT License (see LICENSE)
  * @link 		http://gitlab.ssc.etg.gc.ca/sustaining-applications/CSB-PHPMailerWrapper-SMTP-MAIL-SENDMAIL-2017
  * @license 	http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  *
