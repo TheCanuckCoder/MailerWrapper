@@ -980,37 +980,43 @@ class HCMailWrapper extends \HCMailer2017\PHPMailer {
 			switch ($this->language) {
 				case 'fr':
 					// include our french language file and suppress potential warnings/errors
-					@include 'language/mail-main.lang-fr.php';
-					// Recasting language variables
-					$this->MAIL_UNKNOWN_ERROR = $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'];
-					$this->MAIL_TECH_ERROR = $HC_MAIL_WRAPPER['MAIL_TECH_ERROR'];
-					$this->MAIL_ERROR = $HC_MAIL_WRAPPER['MAIL_ERROR'];
-					$this->MAIL_ERROR_PREFIX = $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'];
-					$this->MAIL_SENT = $HC_MAIL_WRAPPER['MAIL_SENT'];
-					$this->FORM_ERROR_MESSAGE = $HC_MAIL_WRAPPER['FORM_ERROR_MESSAGE'];
-					$this->EMAIL_RECIEVED_REPLY = $HC_MAIL_WRAPPER['EMAIL_RECIEVED_REPLY'];
-					$this->ATTACHMENT_ERROR = $HC_MAIL_WRAPPER['ATTACHMENT_ERROR'];
-					$this->CONNECTION_TEST = $HC_MAIL_WRAPPER['CONNECTION_TEST'];
-					if (trim($this->customReturnMessage) == 'Thanks for contacting us!') {
-						$this->customReturnMessage = $HC_MAIL_WRAPPER['customReturnMessage'];
+					$file = dirname(__FILE__).'/../language/mail-main.lang-fr.php';
+					@include $file;
+					if (file_exists($file)) {
+						// Recasting language variables
+						$this->MAIL_UNKNOWN_ERROR = $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'];
+						$this->MAIL_TECH_ERROR = $HC_MAIL_WRAPPER['MAIL_TECH_ERROR'];
+						$this->MAIL_ERROR = $HC_MAIL_WRAPPER['MAIL_ERROR'];
+						$this->MAIL_ERROR_PREFIX = $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'];
+						$this->MAIL_SENT = $HC_MAIL_WRAPPER['MAIL_SENT'];
+						$this->FORM_ERROR_MESSAGE = $HC_MAIL_WRAPPER['FORM_ERROR_MESSAGE'];
+						$this->EMAIL_RECIEVED_REPLY = $HC_MAIL_WRAPPER['EMAIL_RECIEVED_REPLY'];
+						$this->ATTACHMENT_ERROR = $HC_MAIL_WRAPPER['ATTACHMENT_ERROR'];
+						$this->CONNECTION_TEST = $HC_MAIL_WRAPPER['CONNECTION_TEST'];
+						if (trim($this->customReturnMessage) == 'Thanks for contacting us!') {
+							$this->customReturnMessage = $HC_MAIL_WRAPPER['customReturnMessage'];
+						}
 					}
 					break;
 				default:
 				case 'en':
 					// include our english language file and suppress potential warnings/errors
-					@include 'language/mail-main.lang-en.php';
-					// Recasting language variables
-					$this->MAIL_UNKNOWN_ERROR = $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'];
-					$this->MAIL_TECH_ERROR = $HC_MAIL_WRAPPER['MAIL_TECH_ERROR'];
-					$this->MAIL_ERROR = $HC_MAIL_WRAPPER['MAIL_ERROR'];
-					$this->MAIL_ERROR_PREFIX = $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'];
-					$this->MAIL_SENT = $HC_MAIL_WRAPPER['MAIL_SENT'];
-					$this->FORM_ERROR_MESSAGE = $HC_MAIL_WRAPPER['FORM_ERROR_MESSAGE'];
-					$this->EMAIL_RECIEVED_REPLY = $HC_MAIL_WRAPPER['EMAIL_RECIEVED_REPLY'];
-					$this->ATTACHMENT_ERROR = $HC_MAIL_WRAPPER['ATTACHMENT_ERROR'];
-					$this->CONNECTION_TEST = $HC_MAIL_WRAPPER['CONNECTION_TEST'];
-					if (trim($this->customReturnMessage) == 'Thanks for contacting us!') {
-						$this->customReturnMessage = $HC_MAIL_WRAPPER['customReturnMessage'];
+					$file = dirname(__FILE__).'/../language/mail-main.lang-en.php';
+					if (file_exists($file)) {
+						@include $file;
+						// Recasting language variables
+						$this->MAIL_UNKNOWN_ERROR = $HC_MAIL_WRAPPER['MAIL_UNKNOWN_ERROR'];
+						$this->MAIL_TECH_ERROR = $HC_MAIL_WRAPPER['MAIL_TECH_ERROR'];
+						$this->MAIL_ERROR = $HC_MAIL_WRAPPER['MAIL_ERROR'];
+						$this->MAIL_ERROR_PREFIX = $HC_MAIL_WRAPPER['MAIL_ERROR_PREFIX'];
+						$this->MAIL_SENT = $HC_MAIL_WRAPPER['MAIL_SENT'];
+						$this->FORM_ERROR_MESSAGE = $HC_MAIL_WRAPPER['FORM_ERROR_MESSAGE'];
+						$this->EMAIL_RECIEVED_REPLY = $HC_MAIL_WRAPPER['EMAIL_RECIEVED_REPLY'];
+						$this->ATTACHMENT_ERROR = $HC_MAIL_WRAPPER['ATTACHMENT_ERROR'];
+						$this->CONNECTION_TEST = $HC_MAIL_WRAPPER['CONNECTION_TEST'];
+						if (trim($this->customReturnMessage) == 'Thanks for contacting us!') {
+							$this->customReturnMessage = $HC_MAIL_WRAPPER['customReturnMessage'];
+						}
 					}
 					break;
 			}
